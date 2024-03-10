@@ -1,0 +1,102 @@
+OSNOVE IT
+(osnove informacijskih sistemov)
+
+yup
+
+---------------------------------
+
+GITHUB
+
+Ukazi:
+	create:
+		ustvari nov repo
+		ima 2D: datoteke in čas
+		
+		git:
+			ustvari in vstopi mapo projekta
+			git init imeMape.git
+	
+	checkout:
+		ustvari novo lokalno kopijo, na kateri bomo delali
+		
+	commit:
+		uveljavimo spremembe v repozitorij
+		
+		git:
+			git commit -a -m "sporočilo commit-a"
+			
+	update:
+		obratna opercija od commit
+	
+	add:
+		dodamo novo datoteko v obstoječo mapo
+		
+		git:
+			git add novFile.txt
+			
+	edit:
+		spremeni obstoječo datoteko v repo
+		
+	delete:
+		izbriše obstoječo datoteko iz repo
+		
+	rename:
+		preimenuje datoteko ali premakne mapo
+		
+	status:
+		izpiše seznam sprememb v delavni kopij
+		
+		git:
+			git status
+			
+	diff:
+		prikaže samo nove spremembe
+		
+		
+	revert:
+		prekliči spremembe ki smo nardili
+		
+	log:
+		prikaže zgodovino commitu
+		
+	tag:
+		dodamo ime določeni verziji (alfa, beta, release, your mom)
+		
+	branch:
+		ustvari novo vejo razvoja
+		
+	merge:
+		se mergira branches (možni konflikti)
+		
+	resolve:
+		razreši konflikte v merge
+		
+	lock:
+		onemogoči ostalim editiranje datoteke
+		
+	clone:
+		se prekopira celotni git iz enga placa na drugi
+		
+		git:
+			git clone ssh://uporabnik@domain.com/repo.git
+			
+	push:
+		pošljemo spremembe od našega repo na remote
+		
+		git:
+			git push -all (?)
+			
+	pull:
+		obratno od push - vse spremembe se dajo v lokalni repo
+		
+		git:
+			git pull
+			
+Dobre prakse:
+	- vsaj 2 veji (produkcija in razvoj)
+	
+	- feature branches (veja za dobre stvari ki za zdaj ne rabijo):
+		git checkout -b mojaFunkcionalnost
+			-b je branch
+			
+	- veja za produkcijo (priprava na izdajo končne verzije)

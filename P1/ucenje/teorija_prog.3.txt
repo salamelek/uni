@@ -1,0 +1,285 @@
+Q: Kaksnega tipa morjo bit spremenljivke da bo mozno a==b==c in kaksne so moznosti da to vrne true
+
+A: a, b morata biti istega tipa, c pa mora biti tipa boolean (ker najprej se izračuna a==b, ker je bool)
+
+---------------------------------------------
+Q: jaz sicer nism mu uprasanj ampak sm vidu prvi slide pa je blo.. kdaj je res !a || b && c
+
+ko je (!a || b) true in c true
+
+---------------------------------------------
+Q: Kaj se izpiše: 
+	int a = 1;
+	do {
+	System.out.println(a);
+	a++;
+	} while (a < 0);
+	System.out.println(a);
+
+A: 
+1
+2
+
+---------------------------------------------
+Q: 
+int a = 10; 
+int b = 20; 
+int c = ++a; 
+int d = b++;
+
+A: 
+c = 11
+d = 20
+
+---------------------------------------------
+Q: Kokrat se bo izvedu ta loop: for (int i = 1; i > 0; i++) {...}
+A: vrtel bo v za vedno
+
+---------------------------------------------
+Q: Kaj je rezultat 1 > 2
+A: false
+
+---------------------------------------------
+Q: Kaj vrne (1 == 3) == (4 == 5)?
+A: true
+
+-------------------------------------------
+Q:Kateri so referenčni in kateri primitivni tipi?
+	*int		
+	*int[] 		
+	*Integer	
+	*Integer[]	
+
+edini primitivni tip je int. int[] je kazalec na tabelo, Integer pa je ovojni razred.
+
+(podvprašanje)Q:Razlika med primitivnimi in referenčnimi tipi
+
+A: ko je spremenljivka primitivnega tipa, se njena vrednost shrani direktno
+ko pa imamo referenčni tip, se tabela shrani na nekem naslovu in spremenljivka ima le vrednost naslova
+
+-------------------------------------------
+Q: Kakšna je ASCII koda za '1'
+A: 49
+
+--------------------------------------------
+Q: Koliko je ‘1’ + 2?
+A: 51 --> '3'
+
+--------------------------------------------
+Q: Kaj je ‘5’ - ‘3’
+A: int 2
+
+--------------------------------------------
+Q: Kaj vrne vrstica: '1' + 2 ?
+A: 51
+
+--------------------------------------------
+Q: Zakaj vrnejo vrstice:
+	System.out.println("prva" == "prva")  ... true
+	System.out.println("prva" == new String("prva"))  ... false
+	System.out.println(new String("prva") == new String("prva"))  ... false  (to vrstico upam, da sem se prav zapomnil)
+
+A:
+1) ker imamo isti objekt (String je referenčnega tipa)
+2) ker imamo različna objekta (new String(...) ustvari nov objekt)
+3) spet imamo dva različna objekta
+
+--------------------------------------------
+Q: razlika med 'a' in "a":
+A: 'a' je char, medtem ko "a" je String
+
+---------------------------------------------
+Q: Kakšnega tipa je lahko b v izrazu double a = b?
+A: byte, short, int, long, float, double, char
+
+---------------------------------------------
+Q: Kako prevajalnik prevede:
+	Integer a = 2;
+	Integer b = 3;
+	System.out.print(a * b);
+
+A: 
+System.out.print(a.intValue() * b.intValue());
+
+-------------------------------------------
+Q: ali se naslednji program prevede "1".equals(2)
+A: ne, ker "1" in 2 sta neprimerljivih tipov
+
+---------------------------------------------
+Q: Ali vedno obstaja alternativa uporabi besede break; v zankah?
+A: Da (for i --> i=nekaj; while --> condition = false)
+
+---------------------------------------------
+Q: Kaj se zgodi če v stavku switch pozabimo break?
+A: izvajanje se bo nadaljevalo na naslednji case
+
+---------------------------------------------
+Q: for loop s printf
+A: 
+for (int i=0; i<100; i++) {
+	System.out.printf("i: %d%n", i);
+}
+
+---------------------------------------------
+Q: Neka naloga z tabelami in kaj izpisejo.
+
+
+---------------------------------------------
+Q: kako izračunamo št. elementov v 2D tabeli
+A: .length? for loop? idk kaj ce
+
+---------------------------------------------
+Q: Kako izracunamo velikost 2d tabele? Kako dobimo dolzino vrstice?
+A: -||-
+
+---------------------------------------------
+Q: Kako v zgoščeni tabeli določamo indekse ključev
+A: z metodo .hashCode() % dolzina tabele ali pa poljubno (odvisno od slucaja)
+
+---------------------------------------------
+Q: Kaj je razlika med objektom in objektno spremenljivko
+A: objekt je pod. struktura (?). ob.sprem. pa je spremenjlivka znotraj objekta (npr this.a)
+
+---------------------------------------------
+Q: Razlika med objektom in razredom
+A: objekt je inicializacija razreda (Razred objekt = new Razred)
+
+---------------------------------------------
+object a = new object();
+object b = new object();
+object c = a;
+
+System.out.print(a == b); 
+System.out.print(a.equals(b)); 
+System.out.print(a == c); 
+System.out.print(a.equals(c)); 
+
+A:
+1) false
+2) false
+3) true
+4) true
+
+---------------------------------------------
+Q: Katero metodo moramo implementirati razredu A da lahko System.out.println(a)
+A:
+@Override
+public String toStinrg() {}
+
+--------------------------------------------
+Q: dal kodo dveh razredov, eden deduje drugega in vprašal, zakaj se ne bo prevedlo
+
+--------------------------------------------
+Q: Prestej stevilo atributov, ki spadajo za podrazred
+
+-------------------------------------------
+Q: sm meu nek odsek programa napisan in mogu povedat kaksna je spremenljivka v casu prevajanja kaksna pa v casu izvjanja
+
+---------------------------------------------
+Q: Kaj je abstraktna metoda?
+A: to je "nedokončana metoda". jo samo deklariramo v abstraktnem razredu (ali v vmesniku/interface) in jo lahko overridamo v enem drugem podrazredu, ki deduje/implementira ta razred/interface
+
+---------------------------------------------
+Q: A je razred abstrakten ce imaš samo 1 abstraktno metodo? Kaj pomen da je razred abstrakten? A je abstrakten razred tudi če nima abstraktne metode? Kakšna je abstraktna metoda?
+A: Da. Abstrakten razred pomeni, da je "ogrodje" za njegove nadrazrede. Razred je abstrakten ko mu dodamo besedo "abstract", torej ja. Sicer pa ne moremo ustvariti abstraktnega objekta
+
+---------------------------------------------
+Q: zakaj metoda ne more bit hkrati privatna in abstraktna
+A: ker abstraktna metoda je narejena za bit overridana. To pomeni da nam rabi public access
+
+---------------------------------------------
+Q: Ali se lahko sproži kakšna izjema (nekaj v tem smislu)?
+	public Integer f(Integer a){
+	return a + 1;
+	}
+
+A: lahko se zgodi, da a je null, in torej je null + 1
+
+-------------------------------------------
+Q: Zakaj se izogibamo nepotrebnim setterjem?
+A: da ne povzročamo zmede?
+
+---------------------------------------------
+Q: Abrstaktni razred (kaj točno se ne spomnim....)
+
+
+--------------------------------------------
+Q: Kaj je razlika med abstraktnim razredom in vmesnikom?
+A: Abstraktni razred ima lahko vsekakor metode in spremenljivke, medtem ko vmesnik ne.
+
+--------------------------------------------
+Q: Kaj mora pisati namesto ***, da se program prevede(/dela nisem siguren kaj od tega je blo tocno)
+	public static <T ***> void metoda(T nizi) {
+	  for (String niz : nizi) {
+	    //neka koda k pac ni relevantna
+	  }
+	}
+
+A: implements Iterable<String>
+
+------------------------------------------
+Q: Kako se implementira Comparator
+
+
+--------------------------------------------
+Q: Povej razliko med Comparable in Comparator.
+
+---------------------------------------------
+Q: tista z mnozico k redefiniramo compareTo
+
+---------------------------------------------
+Q: Kaj je naravna urejenost, kako jo implementiras, primer naravne urejenosti?
+
+---------------------------------------------
+Q: <T ***> kaj mora bit namesto * da bo naravna urejenost
+
+---------------------------------------------
+Q: katero metodo je potrebno dopisati, ko implimentiramo Iterable
+
+---------------------------------------------
+Q: Kako deluje zgoščeni seznam? Podvprašanje: kako iščemo elemente po takem seznamu?
+
+---------------------------------------------
+Q: Razlika med List in Set
+
+---------------------------------------------
+Q: nastej 3 razrede ki implementirajo Collection (pol prasa se za razliko med list in set)
+
+---------------------------------------------
+Q: Kateri razredi implementirajo List? (Naštej tri)
+
+---------------------------------------------
+Q: Kaj je razlika med LinkedList in ArrayList?
+
+---------------------------------------------
+Q: Arraylist in Linkedlist
+
+---------------------------------------------
+Q: Primerjaj TreeMap in HashMap
+
+---------------------------------------------
+Q:Naštej in razloži dva vsebovalnika, ki spadata pod set.
+
+-------------------------------------------
+Q:Kaj izpiše map.size, če imamo razred z metodo compare();, ki vedno vrne 0,
+v metodi main pa imamo napisano:
+	
+	TreeSet map = new TreeSet(); 
+	map.add (10);
+	map.add (10);
+	map.add (20);
+	map.add (30);
+
+
+-------------------------------------------
+Q: Kaj je značilno za vsebovalnik, ki lahko uporablja for-each?
+
+-------------------------------------------
+Q: Kaj morata biti (a, b) v lambda operaciji, če urejamo List<Integer>?
+
+-------------------------------------------
+Q: Nek primer z lambdo, kateri vmesnik se uporablja, kateri tipi so parametre, kaj v lambdi napisemo za nasprotna urejenost(al nasprotna naravna urejenost can’t remember)
+kaj je nasprotna urejenost v lambdi?
+
+-------------------------------------------
+

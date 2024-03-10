@@ -1,0 +1,22 @@
+# ignore test results
+*.in
+*.out
+*.res
+*.diff
+prikaz.htm
+Test*.java
+results/
+
+# i dont really want any compiled files
+*.class
+
+# ignore old stuff not really needed
+/P1/izpiti/
+/P1/stariIzpiti/
+
+# ignore vaje from OIS because of git repos in there
+/OIS/vaje
+
+# ignore all .idea folders
+.idea
+out/

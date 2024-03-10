@@ -1,0 +1,304 @@
+PREDAVANJE 2
+
+fizično plast smo odkljukali v prejšnjem predavanju. Zdaj torej smo na povezavnji pasti
+
+POVEZAVNA PLAST
+
+Frame/okvir je smiselno zaporedje bitov, ki nam predstavlja sporočilo
+
+
+Kaj so storitve povezavne plasti?
+Plast n zahteva storitev iz nižje plasti in na drugi strani streže zgornji plasti
+Vsaka plast ima svoje storitve -> naloge, za katere je zadolžena
+
+1) Okvirjanje datagramov:
+	Lahko si to predstavljamo kot okvirjanje bitov.
+	zaporedje bitov okviri z posebnim zaporednim bitov
+
+2) Zaznavanje in odpravljanje napak:
+	z nekaj dodatnimi biti lahko zaznamo, ali je prišlo do napake pri prenosu okvirja
+	to seveda ni 100%, ampak je dosti bolj zanesljivo kot nič
+
+3) Dostop do medija:
+	ko je medij deljen, se je treba zmenit kdaj kdo pošilja/sprejema
+	MAC protokol (Media Access Control)
+
+4) Zagotavljanje uspešne dostave:
+	uporabi se potrditev sprejema in ponovno pošiljanje, da zagotovimo odlične podatke
+
+5) Kontrola pretoka:
+	pošiljatelj ne sme pošiljat s preveliko hitrostjo za odjemalca
+	če se to zgodi, ogromno podatkov je zgubljenih
+
+Vse te točke so LAHKO implementirane.
+Vsak različni protokol lahko implementira različne točke in ne nekatere druge.
+Recimo ethernet dela 1, 2, 3 ampak ne 4 in 5
+
+točka 4 in 5 pripadajo transportni plasti (protokol TCP/UDP)
+
+---------------------------------------
+
+OKVIRJANJE
+
+pri okvirjanju dodamo glavo (header) in rep (trailer) paketu (zaporedju bitov)
+Ta postopek se imenuje enkapsulacija
+
+ko pride paket do prejemnika, prejemnik prebere glavo in rep in jih odstrani. Nato vsebino poda omrežni plasti
+Temu postopku pravimo dekapsulacija
+
+Vsak protokol definira svojo obliko glave in repa
+ti protokoli so: ethernet, wireless LAN (802.11), ?, ?
+
+
+EN/DEKAPSULACIJA
+
+Vsaka plast ima sporočilo za naslednjo plast.
+Aplikacijska plast ima sporočilo
+Transportna plast doda ? Ht (zdaj je segment)
+Omrežna plast doda header (zdaj je paket)
+Povezvavna plast doda okvir (zdaj je okvir)
+|
+beep boop okvir se prenaša
+|
+Fpovezavna plast odstrani okvir
+Omrežna plast odstrani header
+Transportna plast odstrani ?
+Aplikacijska plast pokaže sporočilo
+
+
+Brskalnik pošlje HTTP request
+Doda se header TCP
+Doda se IP header
+Doda se 802.11 header
+
+
+Datagram je podatkovna enota neke plasti
+Okvir je datagram omrežne plasti
+Segment je datagram transportne plasti
+...
+
+---------------------------------------
+
+ZAZNAVANJE/ODPRAVLJANJE NAPAK
+
+Kako to dela?
+vzemi datagram in mu dodaj bite za preverjanje pravilnosti
+	Tem bitom pravimo EDC
+
+Zaradi sllabe povezave, je lahko katerikoli bit napačen
+
+Z algoritmom preverimo na podlagi EDC bitov, ali je prišlo do napake
+
+
+Različni tipi algoritmov:
+
+1) Parnost: dodamo 1 paritetni bit
+	liha paritetna shema:
+	Če število enic je parno, dodamo 1
+	Če število enic je liho, dodamo 0
+
+	soda paritetna shema:
+	obratno od lihe
+
+	seveda pa to ni zanesljivo. Dejmo to naredit v 2D
+	kotiček spodaj je kumulativni/metakvalitetni bit
+
+	Algoritem v uporabi so HAMMING CODES
+	
+	...
+	
+	ko sindrom je 000, ni prišlo do napak
+	
+	
+2) CRC:
+	dosti boljša metoda, ki uporablja polinome
+	(očitno ne bomo danes)
+	
+3) internetna vsota(?)
+	bomo kdaj drugič delali
+		
+---------------------------------------
+
+DOSTOP DO MEDIJA
+
+Idealni protokol za omrežje s hitrostjo R:
+	- če oddaja eno samo vozlišče, oddaja s hitrostjo R			(izkoristek)
+	- Če oddaja M vozlišč, oddajajo s povprečno hitrostijo R/M	(pravičnost)
+	- protokol je decentraliziran								()
+	- je enostaven												()
+		to je slab kriterij, ker ni kvantitativni ampak kvalitativni
+		
+		
+PROTOKOLI:
+	1) Delitev kanala:
+		kanal razdelimo na podkanale (frekvenčno ali pasovno) in vsakemu uporabniku posvetimo en podkanal
+		
+		TDMA: Time Division Multiple Access
+			v primeru M=4
+			vsakemu pošiljatelju damo nek časovni interval med katerim lahko pošilja in sprejema podatke
+			vsakemu uporabniku pripada 1/M kanala --> pravično
+		
+		FDMA: Frequency Division Multiple Access
+			delimo kanal na frekvence
+			s tem deljenjem pomeni da lahko pošiljamo manj podatkov hkrati
+			Tudi ta delitev je poštena
+			
+		seveda pa s to delitvijo se nikoli ne oddaja s hitrostijo R
+		
+	2) Naključni dostop:
+		pri tej kategoriji imamo trke/kolizije
+		
+		"ko želiš pošiljat, pošiljaj na polno"
+		
+		ALOHA:
+			Recimo da imamo pošiljatelje A, B, C, D in E
+			vsi pošiljajo pakete, ampak če dva paketa sta poslana v istem time frame, bo prišlo do napake in paket bo odvržen
+			paket je torej ranljiv ves čas oddajanja
+			Ta protokol je zelo preprost, ni nobene sinhronizacije
+			
+			ko nastane kolizija:
+				paket pošljemo do konca (ali ne)
+				ponovno pošljemo paket V RANDOM ČASOVNEM OBDOBJU (da se ne stalno izničita)
+				
+			Ta protokol je precej slab
+			Prepustnost tega protokola je ~18%
+			
+		RAZSEKANA ALOHA (slotted aloha):
+			Kot aloha, ampak rabi časovne intervale
+			Pošiljatelji lahko pošiljajo samo ob začetku časovnega intervala
+			random time interval je en int ki pogleda koliko časovnih intervalov bo skippanih
+			
+			boljše kot aloha, ampak vsekakor samo ~37%
+			
+		CSMA: Carrier Sense Multiple Access
+			Carrier Sense: pošlji, samo če nihče drug ne pošilja
+				seveda pa se lahko vseeno zgodijo trki, zaradi propagacije signala
+				ko pa pošiljatelj zazna kolizijo, neha pošiljat --> CSMA/CD -||- CD: collision detection
+			
+			Ko imamo CD pa vsekakor imamo nek čas za zaznavo (abort time)
+			po zaznavi trka, spet pošljejo ob naključnem času
+			tudi ethernet je CSMA/CD (plus se en par stvarc)
+			
+			ethernet:
+				Bob Metcalfe si je domislil koncept skupnega vodila
+				To vodilo je imenoval "ether", hence, ethernet
+				na koncu ethernetnega vodila rabimo terminator (kabel je bil koax in torej brez terminatorja se je signal odbival)
+				ethernet tehnologija ima raznorazne protokole bodisi kar se tiče software ampak tudi hardware
+				na začetku se je uporabilo vodilo, zdaj pa imamo zvezde (uporaba switch)
+					vodilo:
+						vsi vmesniki so v isti kolizijski domeni
+							signal se lahko trči povsod po deljenem vodulu
+						če se vodilo pokvari, je konec
+					
+					zvezda:
+						ločene kolizijske domene
+							ni kolizij med računalniki ki se ne pogovarjajo
+						z zvedo lahko rabimo različne protokole hkrati (npr baker + optika)
+						če se pokvari kabel, ni problema (seveda pa se lahko stikalo pokvari)
+				
+				Okvir ethernet:
+					preambula:
+						7 x 10101010 in 1 x 10101011
+						dolga 8B, je začetek vsakega okvirja. Vsakič pred pošiljanjem paketa se 7x ponovi tista sekvenca bitov
+						preambula rabi, da reciever sinhronnizira uro s pošiljateljem
+					MTU (Maximum Transmission Unit): vsi v omrežju se zmenijo za isti MTU (default 1500B)
+					CRC-32
+						4B kontrolnih bitov za odpravo napak
+						ethernet ne popravlja, enostavno počaka da pošiljatelj ponovno pošlje (je bolj hitro tako)
+					Type:
+						to je polje za multipleksiranje
+						to je polje, v katerem se nahaja oznaka kaj točno smo zapakirali v paketu
+						s šifro označi, kateri tip datagrama je v paketu (IP, ARP, Novell, ...)
+						Je določeno po standardu
+					Source adress:
+						kdo pošilja
+					Dest adress:
+						kdo bi moral sprejeti
+					
+				ethernet ne rabi rokovanja
+				poleg CD rabi eksponentno povečevanje čakanja na naslednjo oddajo:
+					če pride do collision detection, je treba spet poslati pakete.
+					po prvi koliziji, se pošlje od 0 do 1 naslednjih intervalov (50% trka)
+					po drugi koliziji, se pošlje ponovno od 0 do 3 naslednjih intervalov (25% trka)
+					po tretij koliziji, se pošlje ponovno od 0 do 7 naslednjih koliziji intervalov (12.5% trka)
+					to se nadaljuje do prbl 1000 intervalov
+					
+				če s cd-jem se zazna trk, se pošlje jam signal, ki pokvari vse CRC-je paketov, ki so bili poslani med trkom
+				
+				učinkovitost rabe etherneta je 85-100%					
+			
+			sem spada tudi CSMA/CA (collision avoidance) (se rabi za wifi 802.11):
+				to je seveda protokol za naključni dostop
+				CS (Carrier Sense) ne deluje dobro, ker imajo dostopne točke različna področja pokritosti 
+					(niso usi na istem vodilu, ne usi zaznajo vse)
+					A -----> B <----- C
+				uporablja se torej dva posebna okvirja:
+					RTS (Request To Send)
+						naprava pošlje RTS okvir
+					CTS (Clear Ro Send)
+						ko naprava dobi, odda vsem naprav vsem ostalim
+						to pomeni, ko neka naprava dobi CTS in ni zahtecala RTS, potem bo utihnila, da ne bo kolizij
+						
+				Dostop do medija 802.11 wifi:
+					imamo dve posebni situacij:
+						- Skrita terminala - Napravi A in c vzajemno skrtia (oba se ne vidita)
+							kljub temu se lahko ustvari kolizija v B
+							A torej pošlje RTC, B pa CTS A-ju in C-ju
+							C dobi CTS in je torej tiho, medtem ko A pošlje uspešno
+						- Izpostavljena terminala (B in C sta si izpostavljena)
+							A <- B xx C -> D
+							kljub trku med B in C, A in D dobita čist signal in torej ni težav
+						
+			Protokol PPP:
+				to je point-to-point protokol
+				se ne uporablja na oddajnih (broadcast) povezavah, temveč na povezavah med dvema točkama (point-to-point)
+				
+				Okvir:
+					začetek okvirja: 01111110 (1B)
+					Adress in Control (1B, 1B):
+						fiksno na 11111111, 00000011, za zdaj še neuporabni
+					protocol:
+						oznaka protokola omrežne plasti (kot type)
+						je polje za multipleksiranje
+					info:
+						podatki omrežne plasti, max 1500B
+					check (CRC-16 ali 32)
+					konec: 01111110
+					
+				kaj pa če v info dobimo sekvenco za konec?
+					stuffing
+					če imamo sekvenco 01111110, vrinemo pred njo kodo 01111101
+					podobno kot \ pred "
+						
+	
+	3) Izmenični dostop:
+		namesto da se računalniki borijo za dostop, računalniki rezervirajo njihov čas
+		tu imamo centralno vozlišče, ki odloča o vsem.
+		seveda, če in ko centralno vozlišče propade, nihče ne more pošiljati. Temu se reče SPF (Singe Point of Failure)
+		
+		drugi pristop pa je krožni strukturi namesto po vodilu. 
+		govori tisti, ki ima žeton
+		če žetona ni več, se ustvari novega
+		
+		
+------------------------------
+
+
+
+Naslavljanje naprav na povezavni plasti
+	vsaka naprava ima fizični MAC naslov
+	MAC naslov ima 12 16iškimi znaki
+	vse skupaj je torej 2^48 naslovov
+	navadno je prva polovica proizvajalec, druga polovica pa znotraj proizvajalca
+	MAC naslov je zapečen v hardwareju
+	IP naslov pa je logičen naslov
+	
+	Da dobimo MAC preko IP-ja uporabimo ARP (Affress Resolution Protocol):
+		vsako vozlišče ima ARP tabelo, ki vsebuje 3 podatke:
+		naslov IP; naslov MAC; TTL (20 min)
+		ARP deluje samo lokalno, ne po celem internetu
+		
+		nastanek ARP tabele:
+			računalnik pošlje "arp poizvedbo" (me zanima MAC, za računalnik z IP-jem xxxx)
+			seveda pa je to treba postaviti v primeren okvir. Seveda pa potem ta okvir protokol postavimo na ARP (0x0806)
+			nato računlanik odgovori z MAC naslovom. yay :D

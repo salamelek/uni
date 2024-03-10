@@ -1,0 +1,5 @@
+"Vmesniki so neke vrste abstraktnih razredov"
+
+Razred lahko implementira vmesnik in lahko implementira vse abstraktne metode (če jih ne implementira vse, bo razred abstrakten)
+
+Vmesnik Comparable:

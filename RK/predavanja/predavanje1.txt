@@ -1,0 +1,173 @@
+SPLOŠNO O OMREŽJIH
+
+1) omrežna naprava / končni sistem: naprava, ki se poveže na omrežje
+2) jedro / usmerjevalniki: usmerjajo promet podatkov
+3) povezave: povezujejo komponente (brez / žične)
+
+---------------------
+
+DOSTOP DO OMREŽJA
+
+1) modemski/klicni  dostop
+	računalnik se poveže na modem (de/modulator)
+	modem pretvori informacije v binarnem sistemu v zvočne signale
+	modem pda podatke drugemu modemu preko telefonske linije
+	
+	slabost tega je seveda, da le en dostop na telefonsko številko je možen
+	
+2) DSL (Digital Subscriber Line) dostop:
+	uporablja tudi telefon, ampak:
+	
+	računalnik je priklopljen preko modema na razdelilec
+	razdelilec zna kombinirat računalniški signal skupaj z glasom ostalih
+		telefon: 	0-4 kHz
+		upstream: 	4-50 kHz
+		downstream: 50-1000 kHz
+		
+	ponudnik pa ima multiplekser, ki razdruži signal
+		govor poščlje v telefonsko omrežje, podatke pa v ustrezno napravo/omrežje
+	
+	S tem (in dobrimi telefonskimi linijami, se doseže do 100Mbps)
+	
+3) Kabelski dostop
+	uporablja TV indrastrukturo
+	več odjemalcev si deli dostop do skupnega vozlišča
+	pomanjklivost tega sistema je pravičnost: nekdo lahko rabi več kot drugi
+	
+4) FTTH (optičen) dostop:
+	povezava je skoraj direktna
+	hiter prenos
+	
+5) Ethernet dostop:
+	? (oopsie)
+	
+6) WiFi:
+	Wireless Fidelity
+	802.11b/g (WiFi): 11 ali 54 Mbps
+	802.11n/ac/ax (WiFi, v razvoju): 600 Mbps, 1300 Mbps, 10Gbps
+	
+	to je deljen in neusmerjen medij:
+		deljen: vse naprave se lahko na isti wifi povežejo
+		neusmerjen: podatki se širijo po celem prostoru
+	
+7) 3G/4G/LTE/5G:
+	uporaba central mobilnih operaterjev
+
+----------------------------
+
+JEDRO OMREŽJA
+
+imamo 2 načina: 
+	1) povezan način:
+		imamo 3 faze:
+			- vzpostavitev
+			- zveza
+			- rušenje
+
+	2) nepovezan način:
+		prenaša podatke "po kosih"
+		vsak paket vsebuje informacije kam mora it
+		
+PROTOKOL:
+	višjenivojski: TCP, IP, HTTP, FTP, SMTP, POP3, BitTorrent, ...
+	nižjenivojski: zaporedje bitov, kontrola sasičenja, kontrola toka, načina potovanja paketa po omrežju, ...
+	
+	standardi:
+		IETF (Internet Engineering Task Force):
+			imajo standarde v obliko dokumentov RFC
+		Drugi subjekti, kot IEEE 802, itd.
+		Privatna omrežja (najbolj znano: skype)
+		
+-------------------------
+
+OMREŽNE STORITVE IN PLASTI
+
+protokol je jezik, s katerim se pogovarja istoležni par procesov (torej ista plast)
+plasti rabimo za boljšo predstavitev in še posebej za spremembe določenega dela sistema
+	s plastmi lahko dosežemo spremembo nekega sistema brez da se dotikamo ostalih plasti
+	
+ISO/OSI model:
+	ima 7 plasti
+	plast n nudi storitve plasti n+1
+	. . .
+	
+	7) aplikacijska plast		podatki aplikacij, storitve
+	6) predstavitvena plast		kako se podatke zakodira/kompresira	
+	5) sejna plast				povezovanje provesov znotraj aplikacij (aplikacijsko multipleksiranje)
+	4) prenostna plast			zanesljivost prenosa
+	3) omrežna plast			usmerjanje, posredovanje, izogibanje zamašitvam
+	2) povezavna plast			bere bite, prijavlja napake
+	1) fizična plast			prenaša bite iza A do B
+	
+zadari popolnosti, je ISO OSI sistem de iure
+ampak 
+
+TCP/IP model:
+	Večje breme pade na programerja, ampak hkrati dopušča večjo fleksibilnost
+	TCP/IP model != TCP/IP protokol
+
+	5) aplikacija
+	4) transport
+	3) internet
+	2) povezavna plast
+	1) fizična plast
+	
+in torej je TCP/IP de facto model, ker dopušča veččjo fleksibilnost
+
+FIZIČNA PLAST:
+	digitalni bit moramo kodirati s točno določenim analognim signalom
+	
+	prenosni medij: naprava, ki omogoča razširjanje valovanja
+		smer: svosmeren (sočasno/izmenično), enosmeren
+		zaporednost: serokslo (bit za bitom), paralelni (več bitov hkrati)
+		število točk: dvotočnovni, skupinski
+	
+		UTP (unshielded twisted pair):
+			spiralni kabli
+			za lokalna omrežja
+			do 10Gbps
+			
+		koaksialni tabel:
+			2Gbps
+			??
+			
+		optično vlakno:
+			mehanska občutljivost (ne zvijaj preveč)
+			do 100 Km brez ponavljalnikov
+			WDM: rabimo več barv
+			
+		Brezžične povezave:
+			yes
+		
+	frekvenčna karakteristika: katere frekvecnce lahko prenaša medij
+		telefon: 300-7000 Hz
+	
+	prejet signal je vedno slabši od originalnega. Treba je dobiti sistem, s katerim lahko razberemo bite (šum, popačenje, )
+	
+	modulacija:
+		modulacija je spremeniti digitalnegi signal v analognega
+		
+		amplitudna modulacija:
+			spremembra je v amplitudi valovanja
+			0: tišina
+			1: močno valovanje
+			
+		frekvenčna modulacija:
+			sprememba je v frekvenci valov
+			neka frekvenca je 0, neka druga pa 1
+			
+		fazna modulacija:
+			sprememba je v fazi valovanja
+			0 je recimo sin(x)
+			1 je recimo sin(x +- pi)
+			
+			s fazami lahko zakodiramo tudi več bitov:
+				00: x
+				01: x + pi/2
+				10: x + pi
+				11: x + 3/2 pi
+				
+		kvadratna modulacija:
+			kombinacija amplitudne in fazne modulacije
+			s tem lahko kompresiramo signal
+			seveda če imamo 4 fazne kote in 2 amplitudi, torej imamo 4*2 bitov --> 8 bitov prenosa

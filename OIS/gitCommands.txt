@@ -1,0 +1,20 @@
+GIT COMMANDS
+
+
+git init																					create git repo in current dir
+git status																					check status of git repo
+git log --graph																				show log with graph
+
+git add remote <name> https://<username>:<token>@github.com/<repo_username>/<repo_name>		connect github to git repo
+git push <remote> <branchToPush																push given branch to remote
+git fetch																					get all branches from remote
+git pull																					get every update from remote
+
+git checkout -b <branch>																	create new branch and enter it
+git checkout <branch>																		enter branch
+git remove -b <branch>																		remove branch
+git <remote> -d <branch>																	remove branch from remote
+
+git merge <branch>																			merge the given branch to current one
+
+git add .																					add every file there is to add

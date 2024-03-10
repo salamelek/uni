@@ -1,0 +1,75 @@
+PREDAVANJE 2 OIS
+
+
+Delovni model:
+	do katere stopnje smo standardizirali procese, ki jih počnemo?
+	do katere stopnje integriramo svoje podatke?
+	
+	integriranje podatkov: to, da imas vse centralne podatke
+	
+IT arhitektura podjetja:
+	piverzifikacija, poenotenje, usklajevanje, podvajanje
+	
+	kaj je IT arhitektura podjetja?:
+		treba je vpoštevat katere tehnologije rabit za kaj
+		načrt procesov, podatkovnih baz, aplikacij in tehnologij infrastrukture
+		
+	stopnje arhitekture:
+		1) silos aplikacij:
+			delovni model diverzifikacij
+			v takšnem scenariju se aplikacije razvijajo za pomoč uporabnikom
+			je generično
+
+		2) standardna tehnologija:
+			delovni model diverzifikacije
+			tehnologijo imamo in je standardizirana (?)
+			je pomembno, ker vzdrževanje je dosti lažje
+
+		3) racionalizirani podatki / optimizirano jedro:
+			imamo neko stopnjo standardizacije procesov/podatkov
+			je lahko bodisi usklajevanje, podvajanje ali celo poenotenje
+			so učinkoviti poslovni procesi
+			težje je prodati to stvar
+
+		4) modularna arhitektura:
+			imamo standardizacijo podjetja
+			obstaja čim manjša stopnja povezanosti med moduli (spremembe v modulu ne vplivajo na drugi)
+			dovoljuje inovativnost
+			tudi tukaj usklajevanje, podvajanje ali celo poenotenje
+			vsi to hočejo, ampak je najtežje to doseči
+			to so entrerprise sistemi
+			
+		moramo omogočat eksperimentiranje
+		
+kako se odločamo, kam investirat v IT?:
+	
+kakšna je cena za ERP (enterprise resource planning)?
+	stroški lastništva:
+		stroški pridobivanja
+		strođki delovanja
+		stroški upravljenja ob koncu življenske dobe
+		
+	Metoda točk primerov uporabe (UCP):
+		1) opredelitev primerov uporabe
+			se ustvari en DPU (en graf uporabe)
+		
+		2) izračun neprilagojene uteži akterjev (UAW)
+			se določi UAW, torej se klasificira kaj bo najbolj težko implementirati
+		
+		3) neprilagojene uteži primerov ..
+			UUCW se pogleda kako so zahtevni procesi (x2??)
+		
+		4) TCF (tehnična kompleksnost)
+			določanje pomembnosti nalog
+		
+		5) točke primerov uporabe (UCP)
+			se da vse prejšnje podatke v formulo in se izračuna UCP
+		
+		6) izračun napora (koliko ljudi bomo potrebovali za implementacijo)
+			UCP pomnožimo s faktorjem produktivnosti PF
+			rezultat je koliko ur rabimo
+		
+		7) izračun stroška
+			če vemo koliko ur rabimo in koliko plačamo na uro, lahko izračunamo približno oceno
+			
+

@@ -1,0 +1,31 @@
+ARHITEKTURA RAČUNALNIŠKIH SISTEMOV
+
+ISA: instructions set architecture
+	ukazna arhitektura
+	ukazi, ki jih računalnik lahko opravi
+	
+arhitektura:
+	- aplikacija
+	- algoritem
+	- programski jezik
+	- zbirni jezik
+	- ukazna arhitektura (ISA)
+	- mikroarhitektura (kako je implementirana stvar (?)) 
+	- RTL (register transfer level)
+	- logična vrata
+	- naprave (tranzistorji)
+	- fizika
+	
+	
+---------------------------
+
+Strojno računanje
+
+CPE (centralna procesna enota)
+GP (glavni pomnilnik)
+ALE (aritmetično logična enota)
+
+GP pošlje ukaz kontrolni enoti CPE
+ALE in GP si izmenjujeta operande
+CPE ima tudi registre (začasno pomnjenje)
+Vhodno - izhodni sistem pa podaja podatke iz realnega sveta v strojno razumne in obratno
