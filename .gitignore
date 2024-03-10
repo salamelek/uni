@@ -20,3 +20,6 @@ results/
 # ignore all .idea folders
 .idea
 out/
+
+# ignore the big fat files
+RK/RK_ucbenik.pdf
