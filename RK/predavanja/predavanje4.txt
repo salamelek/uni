@@ -1,0 +1,101 @@
+PREDAVANJE 4
+
+
+OPREMA ZA POVEZOVANJE
+
+repeater:
+	ojači šibek signal na dobrega
+	ta naprava dela samo na fizični plasti. ga sploh ne zanima podatek
+	
+hub:
+	deluje na fizičnem nivoju
+	ima podobno vlogo kot razdelilec za elektriko
+	ko pride neko zaporedje bitov od enega, ga porazdeli vsem ostalim napravam
+	to pa je seveda konceptualno isto kot glavno vodilo, torej so vsi v isti kolizijski domeni. No gud D:
+	
+switch:
+	deluje na drugem nivoju
+	switch pogleda vsebino okvirja in vidi kdo je pošiljatelj in kdo sprejemnik
+	okvir bo posredoval le sprejemniku in torej bo izolirana kolizijska domena
+	stikalo se sčasoma nauči kje je kateri računalnik
+	ima 3 akcije:
+		posredovanje, poplavljanje, filtriranje
+		forwarding,   flooding,     filtering (fff)
+		
+	nekateri industrijski switch imamo protokol S..:
+		preprečuje cikle med switch 
+		
+	stikala rabijo stikalno tabelo:
+		<MAC | vrata | TTL>
+		ko stikalo dobi nek okvir, mapira MAC pošiljatelja s vrati na stikalu
+		
+	Flooding:
+		stikalo pošlje vsem vratom, ker še ne ve kje je sprejemnik
+		to je različno od brodcasting, ker brodcasting ima sprejemnik FFFFFFFFFF.. (48x 1)
+			če je MAC naslov same enice, potem bodo vsi sprejeli
+		flooding pa ima točno določen MAC naslov, in tj. bodo ostali ignorirani
+		
+	Forwarding:
+		pošlje okvir točno tistemu, kateremu je namenjen
+		
+	Filtering:
+		če je okvir namenjen istim vrat, ga zavržemo
+		
+	povezovanje stikal
+	
+	Virtualna lokalna omrežja (VLAN):
+		namesto imet več manjših stikal, eno večje VLAN stikalo se lahko obnaša kot več manjših
+		Oredbist tega je, da namesto se jajcat s kabli, lahko konfiguriramo n-ti port da je del m-tega stikala
+		
+		
+====================================================
+
+OMREŽNA PLAST
+
+zdaj bomo govorili o paketih, ki so bili enkapsulirani v okvirjih
+
+razlika med omrežno in transportno plastjo:
+	omrežna plast dobi fizično pot od pošiljatelja do sprejemnika
+	transportna plast pa samo zagotavlja povezavo z drugim računalnikom
+	
+	tj. transportna plast reče omrežni, da se hoče povezat na x računalnik
+	
+	
+Usmerjevalnik (router):
+	Ta naprava dela na tretji (omrežni) plasti. To pomeni, da sega v paket
+	usmerjevalniki povezujejo različna omrežja
+	
+	usmerjevalniki opravljajo usmerjanje in posredovanje
+	
+	posredovanje (forwarding):
+		ko pride en podatek na port1, se odloči na kateri port ga poslat
+		usmerjevalnik mora odločiti zelo hitroo kam poslat paket, a če pride preveč paketov imamo:
+			input buffer: se nabirajo vhodni paketi
+			output buffer: se nabirajo izhodni paketi
+		
+		kako pa se odloči na kateri port posredovati paket?
+			vsak usmerjevalnik ima posredovalno tabelo
+	
+	usmerjanje (routing):
+		ta naloga določi pot paketa od izvora do cilja
+		to je kolektivno delo usmerjevalnikov
+		to se doseže s usmerjevalnimi protokoli
+			ta protokol pomaga usmerjevalnikom vedet kam poslat pakete
+			
+na tej plasti deluje IP protokol
+IP protokol ne zagotavlja nobene storitve :> seveda pa se temu reče best-effort service
+Obstajajo pa druga omrežja (npr. ATM), ki zagotavljajo določene storitve
+
+Povezavna omrežja:
+	se ustvari pot od A do B in se prenašajo podatki
+	
+Nepovezavna omrežja:
+	paketi potujejo vsak po svoje
+	dodaten problem vrstnega reda paketov
+	
+Navidezni vodi (virtual ?):
+	posredovalna tabela pri navideznih vodih izgleda takole:
+	<vodni vmesnik | vhodna št. voda | izhodi vmesnik | izhodna št. voda>
+	en navidezni vod ni ena fizična povezava, ampak po isti fizični povezavi imamo različno označene vode
+	
+
