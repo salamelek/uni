@@ -1,0 +1,81 @@
+PREDAVANJE 6
+
+
+Predvanje 5: DHCP, kako dobit IP
+
+IPv4 številk je zmanjkalo. Preden se je to zgodilo, so se ljudje borili na različne načine:
+	CIDR:
+		se uporabi masko, da ?
+		
+	Zasebni naslovni prostor:
+		to so naslovi, ki se začnejo z 192.168.0.0/16
+		Ti naslovi ne rabi, da so unikatni
+		To dela samo, ker so to zasebni naslovni prostori
+		Usmerjevalniki pa pazijo, da ti zasebni naslovi ne grejo v globalni internet
+		Kako pa lahko dostopamo do interneta? usmerjevalnik uporablja NAT
+		Usmerjevalnik ima javni naslovni IP, s katerim se povezuje na internet v imenu celega zasebnega omrežnega prostora
+		Edini problem ki ostaja, je kako lahko usmerjevalnik pošllje pakete do pravilnega računalnika. Temu rabi NAT:
+			Uporabljajo se ports. Ports se rabijo, da računalniki vedo, kateri proces se pogovarja s katerim
+			Ker usmerjevalnik bo spremenil naslov na njegov javni naslov in port na njegov port. 
+			Kar odgovor na tisti port bo odgovor tistemu racunalniku
+			NAT: network adress translation
+			se imenuje tudi PAT: port adress translation
+			
+		Prednosti:
+			- Se prihranja naslove
+			- Naslove se lahko spreminja neodvisno v zasebnem omeržju
+			- večja varnost naprav, ker niso javne
+			- do 60K povezanih notranjih naprav
+
+		Hibe:
+			- Usmerjevalniki naj bi delali na 3. (omrežni) plasti, ampak porti so del 4. plasti
+			- Porti rabijo naslavljanju procesov, ne računalnikov
+			- Krši princip končnih sistemov, ne delajo P2P aplikacije
+			- Boljši je IPv6
+			
+			
+Protokol ICMP (za ping):
+	Aplikacija traceroute:
+		prvi paket bo imel ttl 1, in torej prvi računalnik nam vrne paket.
+		drugi paket ima ttl 2, torej dobim ip od 2. ralunalnika
+		tako dalje do cilja
+		
+		
+IPv6:
+	Nova IP verzija, ki poboljša šibkosti ipv4
+		Dovolj IP naslovov:
+			je 128 bitni naslov, kar bo za vedno dovolj
+		
+		Hitrejše usmerjanje:
+			Glava je fiskna na 40 Bytes
+			S tem nimamo več opcije (nam pohitri stvar)
+			Fragmentacija ni dovoljena
+			glava ne vsebuje več kontrolne vsote (je že na ostalih plasteh)
+			
+		Kakovost storitev:
+			?
+		
+	Sintaksa:
+		21da:00d3:0000:2f3b:02aa:00ff:fe28:9c5a --> 21da:d3:0:2f3b:2aa:ff:fe28:9c5a
+		ff02:0:0:0:0:0:0:2 --> ff02::2
+		
+	Pretvorba v4 -> v6:
+		Ni mogoče pretvoriti vse naprave hkrati, torej je treba pusti obe na internetu
+		Kako pa se lahko ipv4 pogovarja z ipv6?
+		
+		Dual stack:
+			Na omrežni plasti delujeta oba protokola
+			Kako izvemo, če prejemnik uporablja v4 ali v6?
+			uporabimo DNS in nam DNS da ip
+			
+			hiba tega pa je, da enkrat ko paket ge skozi v4, nima več flow label		
+				
+			
+		Tunneling:
+			paket ipv6 enkapsuliramo v ipv4 paket
+			
+	Varnost:
+		Večina varnosti je na aplikacijski plasti, ampak na omrežni plasti imamo IPSec
+		
+	Kako se dobi pot:
+		Najprej je treba definirat ceno. Mi iščemo najmmanjšo ceno

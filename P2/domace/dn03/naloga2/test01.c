@@ -7,6 +7,6 @@ bool f(int x, int y) {
 }
 
 int main() {
-    printf("%d\n", tranzitivnost(1, 10));   // 2
+    printf("%d\n", tranzitivnost(1, 100));   // 2
     return 0;
 }
