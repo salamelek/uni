@@ -5,6 +5,7 @@
 *.diff
 prikaz.htm
 Test*.java
+test*
 results/
 
 # i dont really want any compiled files
