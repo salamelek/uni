@@ -4,8 +4,8 @@ import struct
 import sys
 import threading
 
-PORT = 1234
-HEADER_LENGTH = 2
+PORT = 12345
+HEADER_LENGTH = 3
 
 
 def receive_fixed_length_msg(sock, msglen):
@@ -21,7 +21,7 @@ def receive_fixed_length_msg(sock, msglen):
 
 def receive_message(sock):
     header = receive_fixed_length_msg(sock, HEADER_LENGTH)  # preberi glavo sporocila (v prvih 2 bytih je dolzina sporocila)
-    message_length = struct.unpack("!H", header)[0]  # pretvori dolzino sporocila v int
+    message_length = struct.unpack("!HB", header)[0]  # pretvori dolzino sporocila v int
 
     message = None
     if message_length > 0:  # ce je vse OK
@@ -31,7 +31,7 @@ def receive_message(sock):
     return message
 
 
-def send_message(sock, msg, user=None, to=None):
+def send_message(sock, msg, user=None, to=None, msgType=0):
     if not user:
         raise ValueError("user is required")
 
@@ -46,7 +46,7 @@ def send_message(sock, msg, user=None, to=None):
 
     # ustvari glavo v prvih 2 bytih je dolzina sporocila (HEADER_LENGTH)
     # metoda pack "!H" : !=network byte order, H=unsigned short
-    header = struct.pack("!H", len(encoded_message))
+    header = struct.pack("!HB", len(encoded_message), msgType)
 
     message = header + encoded_message  # najprj posljemo dolzino sporocilo, slee nato sporocilo samo
     sock.sendall(message)
@@ -62,7 +62,7 @@ def message_receiver():
 
         jsonMsg = json.loads(msg_received)
 
-        if (jsonMsg["to"] == user or jsonMsg["to"] is None) and jsonMsg["sender"] != user:
+        if jsonMsg["sender"] != user:
             private = ""
             if jsonMsg['to'] is not None:
                 private = "|private"
@@ -71,11 +71,23 @@ def message_receiver():
 
 
 if __name__ == '__main__':
+    """
+    msgType
+    0: public message
+    1: private message
+    2: username request
+    3: username response
+    4: error
+    """
+
     user = input("Input your username: ")
 
     print("[system] connecting to chat server ...")
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.connect(("localhost", PORT))
+
+    # send username
+
     print("[system] connected!")
 
     thread = threading.Thread(target=message_receiver)
@@ -89,12 +101,15 @@ if __name__ == '__main__':
             msgList = msg.split(" ")
 
             to = None
+            msgType = 0
+
             if msgList[0] == "msg":
                 msgList.pop(0)
                 to = msgList.pop(0)
+                msgType = 1
 
             msgSend = " ".join(msgList)
 
-            send_message(sock, msgSend, user, to)
+            send_message(sock, msgSend, user, to, msgType)
         except KeyboardInterrupt:
             sys.exit()
