@@ -1,10 +1,11 @@
+import json
 import signal
 import socket
 import struct
 import threading
 
 PORT = 1234
-HEADER_LENGTH = 2
+HEADER_LENGTH = 3
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 
 
@@ -20,26 +21,27 @@ def receive_fixed_length_msg(sock, msglen):
 
 
 def receive_message(sock):
-    header = receive_fixed_length_msg(sock, HEADER_LENGTH)  # preberi glavo sporocila (v prvih 2 bytih je dolzina sporocila)
-    message_length = struct.unpack("!H", header)[0]  # pretvori dolzino sporocila v int
+    header = receive_fixed_length_msg(sock, HEADER_LENGTH)
+    headerTuple = struct.unpack("!HB", header)
+
+    msgLen = headerTuple[0]
 
     message = None
-    if message_length:
-        message = receive_fixed_length_msg(sock, message_length)  # preberi sporocilo
+    if msgLen:
+        message = receive_fixed_length_msg(sock, msgLen)  # preberi sporocilo
         message = message.decode("utf-8")
 
     else:
         print("Message length is 0!")
 
-    return message
+    return headerTuple, message
 
 
-def send_message(sock, message):
-    encoded_message = message.encode("utf-8")  # pretvori sporocilo v niz bajtov, uporabi UTF-8 kodno tabelo
+def send_message(sock, message, msgType):
+    encoded_message = message.encode("utf-8")
 
-    # ustvari glavo v prvih 2 bytih je dolzina sporocila (HEADER_LENGTH)
     # metoda pack "!H" : !=network byte order, H=unsigned short
-    header = struct.pack("!H", len(encoded_message))
+    header = struct.pack("!HB", len(encoded_message), msgType)
 
     message = header + encoded_message  # najprj posljemo dolzino sporocilo, slee nato sporocilo samo
     sock.sendall(message)
@@ -49,56 +51,133 @@ def send_message(sock, message):
 def client_thread(client_sock, client_addr):
     global clients
 
-    print("[system] connected with " + client_addr[0] + ":" + str(client_addr[1]))
-    print("[system] we now have " + str(len(clients)) + " clients")
+    print(f"[system] connected with {client_addr[0]}:{str(client_addr[1])}")
+    print(f"[system] we now have {len(clients)} clients")
 
     try:
         while True:
-            msg_received = receive_message(client_sock)
+            header, msg_received = receive_message(client_sock)
 
-            if not msg_received:
-                break
+            if msg_received == "":
+                print("Message was empty!")
+
+            jsonMsg = json.loads(msg_received)
+            msgType = header[1]
+
+            respMsg = json.dumps({"status": 1, "msg": ""})
+
+            # server response
+            if msgType == 0:
+                # ignore
+                continue
+
+            # send username
+            elif msgType == 1:
+                username = jsonMsg["sender"]
+
+                if username in usedNames:
+                    respMsg = json.dumps({
+                        "status": 0,
+                        "msg": "Name already in use! (use \"username <your username>\" to set a new one."
+                    })
+
+                else:
+                    usedNames.append(username)
+                    clients[client_sock] = username
+                    respMsg = json.dumps({
+                        "status": 1,
+                        "msg": "Name accepted!"
+                    })
+
+                send_message(client_sock, respMsg, 0)
+
+            # public message
+            elif msgType == 2:
+                # check if the user has a username
+                if clients[client_sock] is None:
+                    respMsg = json.dumps({
+                        "status": 0,
+                        "msg": "Name not set!"
+                    })
+
+                else:
+                    for client in clients.keys():
+                        # Don't send to the sending client
+                        if client is client_sock:
+                            continue
+
+                        send_message(client, msg_received, 2)
+
+                send_message(client_sock, respMsg, 0)
+
+            # private message
+            elif msgType == 3:
+                # check if the user has a username
+                if clients[client_sock] is None:
+                    respMsg = json.dumps({
+                        "status": 0,
+                        "msg": "Name not set!"
+                    })
+
+                else:
+                    found = False
+                    for client, name in clients.items():
+                        if name == jsonMsg["to"]:
+                            found = True
+                            send_message(client, msg_received, 2)
+                            break
+
+                    if not found:
+                        respMsg = json.dumps({
+                            "status": 0,
+                            "msg": "Name not found"
+                        })
+
+                send_message(client_sock, respMsg, 0)
+
+            else:
+                raise Exception("Unknown message type")
 
             print("[RKchat] [" + client_addr[0] + ":" + str(client_addr[1]) + "] : " + msg_received)
 
-            for client in clients:
-                send_message(client, msg_received)
-
     except Exception as e:
         print("An exception occurred: " + str(e))
-        pass
 
-    # prisli smo iz neskoncne zanke
     with clients_lock:
-        clients.remove(client_sock)
+        try:
+            usedNames.remove(clients[client_sock])
+        except ValueError:
+            pass
 
-    print("[system] we now have " + str(len(clients)) + " clients")
+        clients.pop(client_sock)
+
+    print(f"[system] we now have {len(clients)} clients")
     client_sock.close()
 
 
-# kreiraj socket
-server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server_socket.bind(("localhost", PORT))
-server_socket.listen(1)
+if __name__ == '__main__':
+    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server_socket.bind(("localhost", PORT))
+    server_socket.listen(1)
 
-# cakaj na nove odjemalce
-print("[system] listening ...")
-clients = set()
-clients_lock = threading.Lock()
+    print("[system] listening ...")
+    clients = {}
+    usedNames = []
+    clients_lock = threading.Lock()
 
-while True:
-    try:
-        # pocakaj na novo povezavo - blokirajoc klic
-        client_sock, client_addr = server_socket.accept()
-        with clients_lock:
-            clients.add(client_sock)
+    while True:
+        try:
+            client_sock, client_addr = server_socket.accept()
 
-        thread = threading.Thread(target=client_thread, args=(client_sock, client_addr))
-        thread.daemon = True
-        thread.start()
+            with clients_lock:
+                clients[client_sock] = None
 
-    except KeyboardInterrupt:
-        break
+            thread = threading.Thread(target=client_thread, args=(client_sock, client_addr))
+            thread.daemon = True
+            thread.start()
 
-print("[system] closing server socket ...")
-server_socket.close()
+        except KeyboardInterrupt:
+            break
+
+    print("[system] closing server socket ...")
+    server_socket.close()
