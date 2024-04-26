@@ -24,9 +24,12 @@ def receive_message(sock):
     message_length = struct.unpack("!H", header)[0]  # pretvori dolzino sporocila v int
 
     message = None
-    if message_length > 0:  # ce je vse OK
+    if message_length:
         message = receive_fixed_length_msg(sock, message_length)  # preberi sporocilo
         message = message.decode("utf-8")
+
+    else:
+        print("Message length is 0!")
 
     return message
 
