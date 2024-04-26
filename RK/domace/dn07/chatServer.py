@@ -63,6 +63,7 @@ def client_thread(client_sock, client_addr):
 
             for client in clients:
                 send_message(client, msg_received)
+
     except Exception as e:
         print("An exception occurred: " + str(e))
         pass

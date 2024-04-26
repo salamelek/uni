@@ -20,8 +20,7 @@ def receive_fixed_length_msg(sock, msglen):
 
 
 def receive_message(sock):
-    header = receive_fixed_length_msg(sock,
-                                      HEADER_LENGTH)  # preberi glavo sporocila (v prvih 2 bytih je dolzina sporocila)
+    header = receive_fixed_length_msg(sock, HEADER_LENGTH)  # preberi glavo sporocila (v prvih 2 bytih je dolzina sporocila)
     message_length = struct.unpack("!H", header)[0]  # pretvori dolzino sporocila v int
 
     message = None
@@ -57,8 +56,18 @@ def send_message(sock, msg, user=None, to=None):
 def message_receiver():
     while True:
         msg_received = receive_message(sock)
-        if len(msg_received) > 0:  # ce obstaja sporocilo
-            print("[RKchat] " + msg_received)  # izpisi
+
+        if not msg_received:
+            print("Message received is empty")
+
+        jsonMsg = json.loads(msg_received)
+
+        if (jsonMsg["to"] == user or jsonMsg["to"] is None) and jsonMsg["sender"] != user:
+            private = ""
+            if jsonMsg['to'] is not None:
+                private = "|private"
+
+            print(f"[RKchat{private}] {jsonMsg['sender']}: {jsonMsg['message']}")
 
 
 if __name__ == '__main__':
