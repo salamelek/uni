@@ -1,12 +1,11 @@
 import signal
-
-signal.signal(signal.SIGINT, signal.SIG_DFL)
 import socket
 import struct
 import threading
 
 PORT = 1234
 HEADER_LENGTH = 2
+signal.signal(signal.SIGINT, signal.SIG_DFL)
 
 
 def receive_fixed_length_msg(sock, msglen):
@@ -21,8 +20,7 @@ def receive_fixed_length_msg(sock, msglen):
 
 
 def receive_message(sock):
-    header = receive_fixed_length_msg(sock,
-                                      HEADER_LENGTH)  # preberi glavo sporocila (v prvih 2 bytih je dolzina sporocila)
+    header = receive_fixed_length_msg(sock, HEADER_LENGTH)  # preberi glavo sporocila (v prvih 2 bytih je dolzina sporocila)
     message_length = struct.unpack("!H", header)[0]  # pretvori dolzino sporocila v int
 
     message = None
@@ -41,7 +39,7 @@ def send_message(sock, message):
     header = struct.pack("!H", len(encoded_message))
 
     message = header + encoded_message  # najprj posljemo dolzino sporocilo, slee nato sporocilo samo
-    sock.sendall(message);
+    sock.sendall(message)
 
 
 # funkcija za komunikacijo z odjemalcem (tece v loceni niti za vsakega odjemalca)
@@ -52,24 +50,24 @@ def client_thread(client_sock, client_addr):
     print("[system] we now have " + str(len(clients)) + " clients")
 
     try:
-
-        while True:  # neskoncna zanka
+        while True:
             msg_received = receive_message(client_sock)
 
-            if not msg_received:  # ce obstaja sporocilo
+            if not msg_received:
                 break
 
             print("[RKchat] [" + client_addr[0] + ":" + str(client_addr[1]) + "] : " + msg_received)
 
             for client in clients:
-                send_message(client, msg_received.upper())
-    except:
-        # tule bi lahko bolj elegantno reagirali, npr. na posamezne izjeme. Trenutno kar pozremo izjemo
+                send_message(client, msg_received)
+    except Exception as e:
+        print("An exception occurred: " + str(e))
         pass
 
     # prisli smo iz neskoncne zanke
     with clients_lock:
         clients.remove(client_sock)
+
     print("[system] we now have " + str(len(clients)) + " clients")
     client_sock.close()
 
@@ -83,6 +81,7 @@ server_socket.listen(1)
 print("[system] listening ...")
 clients = set()
 clients_lock = threading.Lock()
+
 while True:
     try:
         # pocakaj na novo povezavo - blokirajoc klic
@@ -90,7 +89,7 @@ while True:
         with clients_lock:
             clients.add(client_sock)
 
-        thread = threading.Thread(target=client_thread, args=(client_sock, client_addr));
+        thread = threading.Thread(target=client_thread, args=(client_sock, client_addr))
         thread.daemon = True
         thread.start()
 
