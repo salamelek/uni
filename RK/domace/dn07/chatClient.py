@@ -123,9 +123,6 @@ if __name__ == '__main__':
 
             msgSend = " ".join(msgList)
 
-            if msgSend == "":
-                continue
-
             send_message(sock, msgSend, user, to, msgType)
         except KeyboardInterrupt:
             sys.exit()

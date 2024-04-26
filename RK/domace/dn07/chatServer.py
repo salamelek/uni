@@ -60,6 +60,7 @@ def client_thread(client_sock, client_addr):
 
             if msg_received == "":
                 print("Message was empty!")
+                continue
 
             jsonMsg = json.loads(msg_received)
             msgType = header[1]
@@ -101,12 +102,19 @@ def client_thread(client_sock, client_addr):
                     })
 
                 else:
-                    for client in clients.keys():
-                        # Don't send to the sending client
-                        if client is client_sock:
-                            continue
+                    if jsonMsg["message"] == "":
+                        respMsg = json.dumps({
+                            "status": 0,
+                            "msg": "Don't send empty messages!"
+                        })
 
-                        send_message(client, msg_received, 2)
+                    else:
+                        for client in clients.keys():
+                            # Don't send to the sending client
+                            if client is client_sock:
+                                continue
+
+                            send_message(client, msg_received, 2)
 
                 send_message(client_sock, respMsg, 0)
 
@@ -120,18 +128,25 @@ def client_thread(client_sock, client_addr):
                     })
 
                 else:
-                    found = False
-                    for client, name in clients.items():
-                        if name == jsonMsg["to"]:
-                            found = True
-                            send_message(client, msg_received, 2)
-                            break
-
-                    if not found:
+                    if jsonMsg["message"] == "":
                         respMsg = json.dumps({
                             "status": 0,
-                            "msg": "Name not found"
+                            "msg": "Don't send empty messages!"
                         })
+
+                    else:
+                        found = False
+                        for client, name in clients.items():
+                            if name == jsonMsg["to"]:
+                                found = True
+                                send_message(client, msg_received, 2)
+                                break
+
+                        if not found:
+                            respMsg = json.dumps({
+                                "status": 0,
+                                "msg": "Name not found"
+                            })
 
                 send_message(client_sock, respMsg, 0)
 
@@ -141,7 +156,7 @@ def client_thread(client_sock, client_addr):
             print("[RKchat] [" + client_addr[0] + ":" + str(client_addr[1]) + "] : " + msg_received)
 
     except Exception as e:
-        print("An exception occurred: " + str(e))
+        print(f"An exception occurred: {e}")
 
     with clients_lock:
         try:
