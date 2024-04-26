@@ -1,3 +1,4 @@
+import json
 import socket
 import struct
 import sys
@@ -31,15 +32,25 @@ def receive_message(sock):
     return message
 
 
-def send_message(sock, message):
-    encoded_message = message.encode("utf-8")  # pretvori sporocilo v niz bajtov, uporabi UTF-8 kodno tabelo
+def send_message(sock, msg, user=None, to=None):
+    if not user:
+        raise ValueError("user is required")
+
+    jsonMsg = {
+        "sender": user,
+        "message": msg,
+        "to": to
+    }
+
+    jsonString = json.dumps(jsonMsg)
+    encoded_message = jsonString.encode("utf-8")  # pretvori sporocilo v niz bajtov, uporabi UTF-8 kodno tabelo
 
     # ustvari glavo v prvih 2 bytih je dolzina sporocila (HEADER_LENGTH)
     # metoda pack "!H" : !=network byte order, H=unsigned short
     header = struct.pack("!H", len(encoded_message))
 
     message = header + encoded_message  # najprj posljemo dolzino sporocilo, slee nato sporocilo samo
-    sock.sendall(message);
+    sock.sendall(message)
 
 
 # message_receiver funkcija tece v loceni niti
@@ -50,21 +61,31 @@ def message_receiver():
             print("[RKchat] " + msg_received)  # izpisi
 
 
-# povezi se na streznik
-print("[system] connecting to chat server ...")
-sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-sock.connect(("localhost", PORT))
-print("[system] connected!")
+if __name__ == '__main__':
+    user = input("Input your username: ")
 
-# zazeni message_receiver funkcijo v loceni niti
-thread = threading.Thread(target=message_receiver)
-thread.daemon = True
-thread.start()
+    print("[system] connecting to chat server ...")
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.connect(("localhost", PORT))
+    print("[system] connected!")
 
-# pocakaj da uporabnik nekaj natipka in poslji na streznik
-while True:
-    try:
-        msg_send = input("")
-        send_message(sock, msg_send)
-    except KeyboardInterrupt:
-        sys.exit()
+    thread = threading.Thread(target=message_receiver)
+    thread.daemon = True
+    thread.start()
+
+    while True:
+        try:
+            msg = input("")
+
+            msgList = msg.split(" ")
+
+            to = None
+            if msgList[0] == "msg":
+                msgList.pop(0)
+                to = msgList.pop(0)
+
+            msgSend = " ".join(msgList)
+
+            send_message(sock, msgSend, user, to)
+        except KeyboardInterrupt:
+            sys.exit()
