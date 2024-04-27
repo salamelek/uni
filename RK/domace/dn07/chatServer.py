@@ -9,26 +9,29 @@ HEADER_LENGTH = 3
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 
 
-def receive_fixed_length_msg(sock, msglen):
+def receiveFixedLengthMsg(sock, msgLen):
     message = b''
-    while len(message) < msglen:
-        chunk = sock.recv(msglen - len(message))  # preberi nekaj bajtov
+
+    while len(message) < msgLen:
+        chunk = sock.recv(msgLen - len(message))
+
         if chunk == b'':
             raise RuntimeError("socket connection broken")
-        message = message + chunk  # pripni prebrane bajte sporocilu
+
+        message = message + chunk
 
     return message
 
 
-def receive_message(sock):
-    header = receive_fixed_length_msg(sock, HEADER_LENGTH)
+def receiveMessage(sock):
+    header = receiveFixedLengthMsg(sock, HEADER_LENGTH)
     headerTuple = struct.unpack("!HB", header)
 
     msgLen = headerTuple[0]
 
     message = None
     if msgLen:
-        message = receive_fixed_length_msg(sock, msgLen)  # preberi sporocilo
+        message = receiveFixedLengthMsg(sock, msgLen)
         message = message.decode("utf-8")
 
     else:
@@ -37,18 +40,16 @@ def receive_message(sock):
     return headerTuple, message
 
 
-def send_message(sock, message, msgType):
+def sendMessage(sock, message, msgType):
     encoded_message = message.encode("utf-8")
 
-    # metoda pack "!H" : !=network byte order, H=unsigned short
     header = struct.pack("!HB", len(encoded_message), msgType)
+    message = header + encoded_message
 
-    message = header + encoded_message  # najprj posljemo dolzino sporocilo, slee nato sporocilo samo
     sock.sendall(message)
 
 
-# funkcija za komunikacijo z odjemalcem (tece v loceni niti za vsakega odjemalca)
-def client_thread(client_sock, client_addr):
+def clientThread(client_sock, client_addr):
     global clients
 
     print(f"[system] connected with {client_addr[0]}:{str(client_addr[1])}")
@@ -56,7 +57,7 @@ def client_thread(client_sock, client_addr):
 
     try:
         while True:
-            header, msg_received = receive_message(client_sock)
+            header, msg_received = receiveMessage(client_sock)
 
             if msg_received == "":
                 print("Message was empty!")
@@ -90,7 +91,7 @@ def client_thread(client_sock, client_addr):
                         "msg": "Name accepted!"
                     })
 
-                send_message(client_sock, respMsg, 0)
+                sendMessage(client_sock, respMsg, 0)
 
             # public message
             elif msgType == 2:
@@ -114,9 +115,9 @@ def client_thread(client_sock, client_addr):
                             if client is client_sock:
                                 continue
 
-                            send_message(client, msg_received, 2)
+                            sendMessage(client, msg_received, 2)
 
-                send_message(client_sock, respMsg, 0)
+                sendMessage(client_sock, respMsg, 0)
 
             # private message
             elif msgType == 3:
@@ -139,7 +140,7 @@ def client_thread(client_sock, client_addr):
                         for client, name in clients.items():
                             if name == jsonMsg["to"]:
                                 found = True
-                                send_message(client, msg_received, 2)
+                                sendMessage(client, msg_received, 2)
                                 break
 
                         if not found:
@@ -148,7 +149,7 @@ def client_thread(client_sock, client_addr):
                                 "msg": "Name not found"
                             })
 
-                send_message(client_sock, respMsg, 0)
+                sendMessage(client_sock, respMsg, 0)
 
             else:
                 raise Exception("Unknown message type")
@@ -187,7 +188,7 @@ if __name__ == '__main__':
             with clients_lock:
                 clients[client_sock] = None
 
-            thread = threading.Thread(target=client_thread, args=(client_sock, client_addr))
+            thread = threading.Thread(target=clientThread, args=(client_sock, client_addr))
             thread.daemon = True
             thread.start()
 

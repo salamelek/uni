@@ -4,39 +4,10 @@ import struct
 import sys
 import threading
 
-PORT = 1234
-HEADER_LENGTH = 3
+from chatServer import PORT, receiveMessage
 
 
-def receive_fixed_length_msg(sock, msglen):
-    message = b''
-    while len(message) < msglen:
-        chunk = sock.recv(msglen - len(message))
-        if chunk == b'':
-            raise RuntimeError("socket connection broken")
-        message = message + chunk
-
-    return message
-
-
-def receive_message(sock):
-    header = receive_fixed_length_msg(sock, HEADER_LENGTH)
-    headerTuple = struct.unpack("!HB", header)
-
-    msgLen = headerTuple[0]
-
-    message = None
-    if msgLen > 0:
-        message = receive_fixed_length_msg(sock, msgLen)
-        message = message.decode("utf-8")
-
-    else:
-        print("Message length is 0!")
-
-    return headerTuple, message
-
-
-def send_message(sock, msg, user=None, to=None, msgType=2):
+def sendMessage(sock, msg, user=None, to=None, msgType=2):
     if not user:
         raise ValueError("User is required")
 
@@ -55,10 +26,9 @@ def send_message(sock, msg, user=None, to=None, msgType=2):
     sock.sendall(message)
 
 
-# message_receiver funkcija tece v loceni niti
-def message_receiver():
+def messageReceiver():
     while True:
-        headerTuple, msg_received = receive_message(sock)
+        headerTuple, msg_received = receiveMessage(sock)
         msgType = headerTuple[1]
         jsonMsg = json.loads(msg_received)
 
@@ -66,9 +36,9 @@ def message_receiver():
         if msgType == 0:
             jsonResp = json.loads(msg_received)
 
+            # print errors
             if not jsonResp["status"]:
-                # print errors
-                print(f"[Server]: status: {jsonResp['status']} | msg: {jsonResp['msg']}")
+                print(f"[Server]: {jsonResp['msg']}")
 
             continue
 
@@ -96,9 +66,9 @@ if __name__ == '__main__':
     sock.connect(("localhost", PORT))
 
     # send username
-    send_message(sock, None, user, None, 1)
+    sendMessage(sock, None, user, None, 1)
 
-    thread = threading.Thread(target=message_receiver)
+    thread = threading.Thread(target=messageReceiver)
     thread.daemon = True
     thread.start()
 
@@ -106,9 +76,6 @@ if __name__ == '__main__':
         try:
             msg = input("")
             msgList = msg.split(" ")
-
-            to = None
-            msgType = 2     # public
 
             if msgList[0] == "msg":
                 msgList.pop(0)
@@ -118,11 +85,15 @@ if __name__ == '__main__':
             elif msgList[0] == "username":
                 msgList.pop(0)
                 user = msgList.pop(0)
-                send_message(sock, None, user, None, 1)
+                sendMessage(sock, None, user, None, 1)
                 continue
 
-            msgSend = " ".join(msgList)
+            else:
+                msgType = 2
+                to = None
 
-            send_message(sock, msgSend, user, to, msgType)
+            msgSend = " ".join(msgList)
+            sendMessage(sock, msgSend, user, to, msgType)
+
         except KeyboardInterrupt:
             sys.exit()
