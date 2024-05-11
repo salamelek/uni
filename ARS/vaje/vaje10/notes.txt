@@ -1,0 +1,150 @@
+Za kolokvij:
+	predpomnilnik
+	cevovod
+	plavajoča vejica
+	zmogljivost
+
+
+.data # 0x400
+TAB: .word 1, 2, 3, 4
+
+.text # 0x0
+addi x3, x0, TAB    # 0x0
+addi x4, x0, 2      # 0x4
+addi x17, x0, 10    # 0x8
+jal x1, FUN         # 0xc
+lw x2, 0x404(x0)    # 0x10
+ecall
+
+FUN: addi x4, x4, -1    # se bo 2x izvedla ta zanka
+lw x2, 0(x3)
+addi x2, x2, 0x123
+sw x2, 36(x3)
+addi x3, x3, 8
+bne x4, x0, FUN    # 0x2c
+jr x1              # 0x30
+
+# skupaj je 7 + 6*2 ukazov --> 19 ukazov
+# za vsak ukaz mora procesor dostopati do pomnilnika
+# torej 19 dostopov do pomnilnika
+
+
+
+
+Vsak operand in vkaz pride iz pomnilnika
+Dostop do pomnilnika je zelo počasen (10-100 urnih period) --> počasen sistem
+Za tole rabimo predpomnilnik (pomnilnik na istem čipu od procesorja):
+	Dostop do predpomnilnika traja 1 urino periodo (hitro)
+	
+	upp (ukazni predpomnilnik):
+		je dosti manjši od glavnega pomnilnika
+		M = 32B
+		
+		direktni:
+			stopnja asocijativnosti = 1 (E = 1)
+			to pomeni da lahko samo na en način napišemo pomnilnik (?)
+			8B/blok = 2³B
+			
+			iz teh podatkov lahko izračunamo število setov (S)
+			S = M / (E - blok) = 4 = 2²
+			
+			na koncu pomnilnika rabbimo 3 bite za offset (naslov bajta znotraj bloka)
+			naslednji del je set index, sta 2 bita tega
+			ostalo pa je tag, to je oznaka bloka. S tem ugotvaljamo če je v predpomnilkinu ali ne. Veliko je 27 bitov
+			
+			set | tag | 	podatki
+			----+-----+-----------------
+			 0	| 0x0 |	addi x3, x0, TAB
+			 	|	  | addi x4, xo, 2			# prvič
+			 1	| 0x0 | addi x17, x0, 10		# "normalni" ukazi
+			 	|	  | jal x1, FUN
+			 2	|	  |
+			 3	| 0x0 | addi x2, x4, -1
+			 	|     | lw x2, 0(x3)
+			 	
+		 	
+		 	set | tag | 	podatki
+			----+-----+-----------------
+			 0	| 0x1 |	addi x2, x2, 0x123
+			 	|	  | sw x2, 36(x3)
+			 1	| 0x1 | addi x3, x3, 8		# prvi blok je overridan
+			 	|	  | bne x4, x0, FUN		# to so zdaj ukazi loop-a
+			 2	| 0x1 | jr x1
+			 	|	  |	?	# neznana vrednost iz celice 0x34 (brali smo eno več od programa --> safety issue)
+			 3	| 0x0 | addi x2, x4, -1
+			 	|     | lw x2, 0(x3)
+			 
+			 set se ne spreminja, tag in podatki pa ja
+			 če se tag nahaja v setu, potem ni zgrešitve
+			 
+			 tag (27) | set (2) | offset (3)
+			 ---------+---------+-----------
+			 ...0000  |  00		|  000
+			 ...0000  |  00		|  100
+			 ...0000  |  01		|  000
+			 ...0000  |  01		|  100
+			 
+			 ...0000  |  10		|  000	# jr
+			 
+			 ...0000  |  11		|  000	# FUN
+			 ...0001  |  00		|  000
+			 ...0001  |  01		|  000
+			 ...0001  |  10		|  000
+			 
+			 
+			 gremo pogledat v set 0, ampak tag je 0, torej je zgrešitev (ni bilo zadetka v predpomnilniku), treba je vzet v glavnem pomnilniku
+			 ko dobimo ukaze, jih zapisemo v upp
+			 zdaj pa pogledamo v set 0 in imamo v predpomnilniku addi x4, x0, 2 in ga torej rabimo
+			 S tem in normalno kodo lahko imamo polovico dosegov do glavnega pomnilnika
+			 pravi improvement pa so loops
+			 
+			 (vrsta 3) pogledamo če set 1 ima tag 0 --> ne --> glavni pomnilinik --> prenesemo 2 ukaza
+			 
+			 Ker so vsi ukazi zanke v predpomnilniku, bodo vsi ukazi delali brez glavnega pomnilnika
+			 
+			 
+			 lw in sw ukazi zahtevajo dostop do operandnega predpomnilnika
+
+	 opp:
+	 	1.lw: 0x400
+	 	1.sw: 0x424
+	 	2.lw: 0x408
+	 	2.sw: 0x42c
+	 	lw  : 0x404
+	 	
+	 	tag (27) | set (2) | offset (3)
+	 	---------+---------+-----------
+		0100 000 |  0 0	   |  000		# 0x400, obv.
+		0100 001 |  0 0	   |  100		# 0x424, obv.
+		0100 000 |  0 1	   |  000		# 0x408, obv.
+		0100 001 |  0 1	   |  100		# 0x42c, obv.
+		0100 000 |  0 0	   |  100		# 0x404, konfliktna
+	 
+	 
+	 	set | tag | 	podatki
+		----+-----+-----------------	(1.)
+		 0	| 0x20|	1, 2
+		 
+	 	set | tag | 	podatki
+		----+-----+-----------------	(2.)
+		 0	| 0x21|	?, 0x124
+		 1	| 0x20|	
+		 
+	 	set | tag | 	podatki
+		----+-----+-----------------	(3.)
+		 0	| 0x21|	?, 0x124
+		 1	| 0x21|	
+		 
+	 	set | tag | 	podatki
+		----+-----+-----------------	(4.)
+		 0	| 0x20|	
+		 1	| 0x21|	
+		 
+		 
+	 	M=32B, 8B/blok, E=2, S=2¹
+	 	
+	 	
+ 	Zgrešitve:
+ 		obvezne: 
+ 		konfliktne: večja stopnja asociativnosti
+ 		velikostne: lahko večamo predpomnilnik

@@ -1,0 +1,102 @@
+PING
+
+--- 192.168.8.2 ping statistics ---
+10 packets transmitted, 0 packets received, 100% packet loss
+
+--- 192.168.8.2 ping statistics ---
+10 packets transmitted, 0 packets received, 100% packet loss
+
+
+
+TRACEROUTE
+
+traceroute to 192.168.8.2 (192.168.8.2), 30 hops max, 46 byte packets
+ 1  10.3.0.1 (10.3.0.1)  1.797 ms !N  1.941 ms !N  1.575 ms !N
+ 
+traceroute to 192.168.8.2 (192.168.8.2), 30 hops max, 46 byte packets
+ 1  10.3.0.1 (10.3.0.1)  1.797 ms !N  1.941 ms !N  1.575 ms !N
+ 
+ 
+
+TABELE
+
+R1
+1.1.1.0/24 dev eth1  proto kernel  scope link  src 1.1.1.22 
+10.3.0.0/24 dev eth2  proto kernel  scope link  src 10.3.0.1 
+127.0.0.0/8 dev lo  proto kernel  scope link  src 127.0.0.1 
+172.16.7.0/24 via 1.1.1.21 dev eth1  proto zebra  metric 1
+
+R2
+1.1.1.0/24 dev eth0  proto kernel  scope link  src 1.1.1.11 
+1.1.1.0/24 dev eth1  proto kernel  scope link  src 1.1.1.2 
+127.0.0.0/8 dev lo  proto kernel  scope link  src 127.0.0.1 
+192.168.8.0/24 dev eth2  proto kernel  scope link  src 192.168.8.1 
+
+R3
+1.1.1.0/24 dev eth0  proto kernel  scope link  src 1.1.1.21 
+1.1.1.0/24 dev eth1  proto kernel  scope link  src 1.1.1.12 
+10.3.0.0/24 via 1.1.1.22 dev eth0  proto zebra  metric 1 
+127.0.0.0/8 dev lo  proto kernel  scope link  src 127.0.0.1 
+172.16.7.0/24 dev eth2  proto kernel  scope link  src 172.16.7.1 
+
+
+
+UKAZI
+
+R1
+ip addr add 1.1.1.1/24 dev eth0
+ip addr add 1.1.1.22/24 dev eth1
+ip addr add 10.3.0.1/24 dev eth2
+configure
+set protocols bgp 65531 neighbor 1.1.1.2 remote-as '65532'
+set protocols bgp 65531 neighbor 1.1.1.2 update-source 1.1.1.1
+set protocols bgp 65531 neighbor 1.1.1.21 remote-as '65533'
+set protocols bgp 65531 neighbor 1.1.1.21 update-source 1.1.1.22
+set protocols bgp 65531 parameters router-id 1.1.1.1
+set protocols bgp 65531 network 10.3.0.0/24
+commit
+save
+exit
+
+R2
+ip addr add 1.1.1.11/24 dev eth0
+ip addr add 1.1.1.2/24 dev eth1
+ip addr add 192.168.8.1/24 dev eth2
+configure
+set protocols bgp 65532 neighbor 1.1.1.1 remote-as '65531'
+set protocols bgp 65532 neighbor 1.1.1.1 update-source 1.1.1.2
+set protocols bgp 65532 neighbor 1.1.1.12 remote-as '65533'
+set protocols bgp 65532 neighbor 1.1.1.12 update-source 1.1.1.11
+set protocols bgp 65532 parameters router-id 1.1.1.11
+set protocols bgp 65532 network 192.168.8.0/24
+commit
+save
+exit
+
+R3
+ip addr add 1.1.1.21/24 dev eth0
+ip addr add 1.1.1.12/24 dev eth1
+ip addr add 172.16.7.1/24 dev eth2
+configure
+set protocols bgp 65533 neighbor 1.1.1.22 remote-as '65531'
+set protocols bgp 65533 neighbor 1.1.1.22 update-source 1.1.1.21
+set protocols bgp 65533 neighbor 1.1.1.11 remote-as '65532'
+set protocols bgp 65533 neighbor 1.1.1.11 update-source 1.1.1.12
+set protocols bgp 65533 parameters router-id 1.1.1.21
+set protocols bgp 65533 network 172.16.7.0/24
+commit
+save
+exit
+
+PC1
+ip addr add 10.3.0.2/24 dev eth0
+ip route add default via 10.3.0.1
+
+PC2
+ip addr add 192.168.8.2/24 dev eth0
+ip route add default via 192.168.8.1
+
+PC3
+ip addr add 172.16.7.2/24 dev eth0
+ip route add default via 172.16.7.1
+

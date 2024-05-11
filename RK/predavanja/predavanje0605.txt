@@ -1,0 +1,24 @@
+(še vedno) TRANSPORTNA PLAST
+
+Ali je TCP pravičen?
+	Da
+	S tem, da vsi pošiljatelji linearno povečajo in multiplikativno zmanjšajo hitrost, 
+	bodo se približali limiti, ki je enakomerna delitev pasovne širine
+	
+	Če pa imamo v istem omrežju UDP in TCP, bo UDP izrinil TCP (ke nima nobene kontrole)
+
+
+------------------------------------------------------
+
+
+APLIKACIJSKA PLAST
+
+HTTP
+	request in response delajo na portu 80
+
+FTP
+	se rabi za prenos datotek
+	port 21
+
+SMTP
+	elektronska pošta
