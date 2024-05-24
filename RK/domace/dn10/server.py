@@ -1,3 +1,4 @@
+import ssl
 import signal
 import socket
 import struct
@@ -80,20 +81,40 @@ def clientThread(client_sock, client_addr):
     client_sock.close()
 
 
+def setupSslContext():
+    context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
+    context.verify_mode = ssl.CERT_REQUIRED
+
+    context.load_cert_chain(certfile="server.crt", keyfile="server.key")
+    context.load_verify_locations(cafile="clients.pem")
+
+    context.set_ciphers('ECDHE-RSA-AES128-GCM-SHA256')
+
+    return context
+
+
 if __name__ == "__main__":
     # kreiraj socket
+    my_ssl_ctx = setupSslContext()
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
     server_socket.bind(("localhost", PORT))
     server_socket.listen(1)
 
     # cakaj na nove odjemalce
     print("[system] listening ...")
+
     clients = set()
     clients_lock = threading.Lock()
+
     while True:
         try:
-            # pocakaj na novo povezavo - blokirajoc klic
             client_sock, client_addr = server_socket.accept()
+            client_sock = my_ssl_ctx.wrap_socket(client_sock, server_side=True)
+
+            print(client_sock)
+            print(client_sock.getpeercert())
+
             with clients_lock:
                 clients.add(client_sock)
 
@@ -103,6 +124,13 @@ if __name__ == "__main__":
 
         except KeyboardInterrupt:
             break
+
+        except ssl.SSLCertVerificationError:
+            print("Client tried to connect but certificate verification failed")
+
+        except ssl.SSLError as e:
+            print("Something happened with SSL.. maybe a client?")
+            print(f"Error: {e}")
 
     print("[system] closing server socket ...")
     server_socket.close()

@@ -1,12 +1,23 @@
+import sys
+import ssl
 import socket
 import struct
-import sys
 import threading
 
 from server import PORT, receiveMessage
 
 
 def send_message(sock, msgType, message):
+    """
+    MsgType:
+        0:
+
+    :param sock:
+    :param msgType:
+    :param message:
+    :return:
+    """
+
     encoded_message = message.encode("utf-8")
 
     # create msg header (msg len and msg type)
@@ -26,19 +37,23 @@ def message_receiver():
         print("[RKchat] " + msg_received)
 
 
-def connectToServer():
-    print("Connecting to server...")
-
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+def connectToServer(sslCtx):
+    sock = sslCtx.wrap_socket(socket.socket(socket.AF_INET, socket.SOCK_STREAM))
     sock.connect(("localhost", PORT))
-
-    print("Done!")
 
     return sock
 
 
-def secureConnection():
-    pass
+def setupSslContext():
+    context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
+    context.verify_mode = ssl.CERT_REQUIRED
+
+    context.load_cert_chain(certfile="janez.crt", keyfile="janez.key")
+    context.load_verify_locations("server.crt")
+
+    context.set_ciphers("ECDHE-RSA-AES128-GCM-SHA256")
+
+    return context
 
 
 def startReceiver():
@@ -48,11 +63,13 @@ def startReceiver():
 
 
 if __name__ == '__main__':
-    sock = connectToServer()
+    print("Connecting to server...")
 
-    secureConnection()
-
+    mySslCtx = setupSslContext()
+    sock = connectToServer(mySslCtx)
     startReceiver()
+
+    print("Done!")
 
     while True:
         try:

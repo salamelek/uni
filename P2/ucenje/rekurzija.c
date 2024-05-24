@@ -5,14 +5,15 @@ void fibRek(int n, long long a, long long b) {
 		return;
 	}
 	
-	printf("%lld\n", a);
+	printf("%d: %lld\n", n, a);
 	
 	fibRek(n-1, b, a+b);
 }
 
 int main() {
-//	fibRek(100, 1, 1);
+	fibRek(100, 0, 1);
 	
+	/*
 	for (int i=0; i<=99; i++) {
 		long long res = 1;
 	
@@ -22,6 +23,7 @@ int main() {
 		
 		printf("%d! = %lld\n", i, res);
 	}
+	*/
 
 	return 0;
 }

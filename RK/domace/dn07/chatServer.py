@@ -175,8 +175,9 @@ if __name__ == '__main__':
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.bind(("localhost", PORT))
     server_socket.listen(1)
-
     print("[system] listening ...")
+
+    # {clientSock: username}
     clients = {}
     usedNames = []
     clients_lock = threading.Lock()

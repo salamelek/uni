@@ -20,6 +20,7 @@ def sendMessage(sock, msg, user=None, to=None, msgType=2):
     jsonString = json.dumps(jsonMsg)
     encoded_message = jsonString.encode("utf-8")
 
+    # create the header
     header = struct.pack("!HB", len(encoded_message), msgType)
 
     message = header + encoded_message
