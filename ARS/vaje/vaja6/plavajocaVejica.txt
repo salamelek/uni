@@ -1,0 +1,34 @@
+PLAVAJOČA VEJICA
+
+"plvavajoča", ker jo lahko premikamo desno in levo z množenjem *10 ali *10^-1
+
+111001,01 = 1,1100101 * 2⁵
+
+enojna natančnost: 32 bitov (float):
+	sign: 1 bit
+	E = e + 127: 8 bitov (eksponent z odmikom)
+	m (mantisa) 23 bitov	
+	
+dvojna natančnost: 64 bitov (double):
+	sign: 1 bit
+	E = e + 1023
+	m: 52 bitov
+	
+
+float 0.1 != float 1/10		Števili nista enaki zaradi zaokroževanja
+Zaradi tega je treba čim več delat s celimi števili
+
+s111..11000..00 	= +-inf
+s111..11x(x!=0)		= NaN
+s000..00x			= ? nisem razumel
+
+
+
+-210,59375 =
+= -11010010, 10011
+= -1, 1010010 10011 * 2⁷
+s = 1
+e = 7  ->  E = 7 + 127 = 134 = 1000 0110
+m = 101001010011
+1100 0011 0101 0010 1001 1000 0000 0000
+c3529800
