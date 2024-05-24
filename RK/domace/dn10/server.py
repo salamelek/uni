@@ -1,3 +1,4 @@
+import json
 import ssl
 import signal
 import socket
@@ -40,10 +41,10 @@ def receiveMessage(sock):
     else:
         print("Message len is 0!")
 
-    return message
+    return msgType, message
 
 
-def sendMessage(sock, msgType, message):
+def sendMessage(sock, msgType: int, message: str):
     encoded_message = message.encode("utf-8")
 
     header = struct.pack("!HB", len(encoded_message), msgType)
@@ -52,33 +53,51 @@ def sendMessage(sock, msgType, message):
     sock.sendall(msg)
 
 
-def clientThread(client_sock, client_addr):
-    global clients
+def clientThread(clientSocket, clientAddr, clientName):
+    global clientsSN, clientsNS
 
-    print(f"[system] connected with {client_addr[0]}:{str(client_addr[1])}")
-    print("[system] we now have " + str(len(clients)) + " clients")
+    print(f"[system] connected with {clientAddr[0]}:{str(clientAddr[1])} - {clientName}")
+    print(f"[system] we now have {len(clientsSN)} clients")
 
     try:
         while True:
-            msg_received = receiveMessage(client_sock)
+            msgType, msgStr = receiveMessage(clientSocket)
 
-            if not msg_received:
+            if not msgStr:
+                print("Huhh???")
                 break
 
-            print(f"[RKchat] [{client_addr[0]}:{str(client_addr[1])}]: {msg_received}")
+            print(f"[RKchat] [{clientAddr[0]}:{str(clientAddr[1])} - {clientName}]: {msgStr}")
 
-            for client in clients:
-                sendMessage(client, 0, msg_received)
+            # public messages
+            if msgType == 0:
+                for client in clientsSN.keys():
+                    sendMessage(client, 0, msgStr)
+
+            # private message
+            elif msgType == 1:
+                jsonMsg = json.loads(msgStr)
+                receiver = jsonMsg["receiver"]
+                receiverSocket = clientsNS[receiver]
+
+                print(f"Sending private message to {receiver}: {jsonMsg['msg']}")
+
+                sendMessage(receiverSocket, 1, msgStr)
+
+            # other types of messages
+            else:
+                print("Other type of msg!")
+                pass
 
     except Exception as e:
-        # tule bi lahko bolj elegantno reagirali, npr. na posamezne izjeme. Trenutno kar pozremo izjemo
-        pass
+        print(f"{clientName} disconnected because of: {e}")
 
-    # prisli smo iz neskoncne zanke
-    with clients_lock:
-        clients.remove(client_sock)
-    print("[system] we now have " + str(len(clients)) + " clients")
-    client_sock.close()
+    with clientsLock:
+        clientsSN.pop(clientSocket)
+        clientsNS.pop(clientName)
+
+    print(f"[system] we now have {len(clientsSN)} clients")
+    clientSocket.close()
 
 
 def setupSslContext():
@@ -93,32 +112,39 @@ def setupSslContext():
     return context
 
 
+def createSocket():
+    serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+    serverSocket.bind(("localhost", PORT))
+    serverSocket.listen(1)
+
+    return serverSocket
+
+
 if __name__ == "__main__":
-    # kreiraj socket
-    my_ssl_ctx = setupSslContext()
-    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    mySslCtx = setupSslContext()
+    serverSocket = createSocket()
 
-    server_socket.bind(("localhost", PORT))
-    server_socket.listen(1)
-
-    # cakaj na nove odjemalce
     print("[system] listening ...")
 
-    clients = set()
-    clients_lock = threading.Lock()
+    # clientSocker: clientName
+    clientsSN = {}
+    # clientName: clientSocket
+    clientsNS = {}
+    clientsLock = threading.Lock()
 
     while True:
         try:
-            client_sock, client_addr = server_socket.accept()
-            client_sock = my_ssl_ctx.wrap_socket(client_sock, server_side=True)
+            clientSocket, clientAddr = serverSocket.accept()
+            clientSocket = mySslCtx.wrap_socket(clientSocket, server_side=True)
 
-            print(client_sock)
-            print(client_sock.getpeercert())
+            clientName = clientSocket.getpeercert()["subject"][3][0][1]
 
-            with clients_lock:
-                clients.add(client_sock)
+            with clientsLock:
+                clientsSN[clientSocket] = clientName
+                clientsNS[clientName] = clientSocket
 
-            thread = threading.Thread(target=clientThread, args=(client_sock, client_addr))
+            thread = threading.Thread(target=clientThread, args=(clientSocket, clientAddr, clientName))
             thread.daemon = True
             thread.start()
 
@@ -133,4 +159,4 @@ if __name__ == "__main__":
             print(f"Error: {e}")
 
     print("[system] closing server socket ...")
-    server_socket.close()
+    serverSocket.close()

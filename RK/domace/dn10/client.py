@@ -1,3 +1,4 @@
+import json
 import sys
 import ssl
 import socket
@@ -7,18 +8,26 @@ import threading
 from server import PORT, receiveMessage
 
 
-def send_message(sock, msgType, message):
+def send_message(sock, msgType, message, receiver=None):
     """
     MsgType:
-        0:
+        0: public message
+        1: private message
+        2: errors
 
+    :param receiver:
     :param sock:
     :param msgType:
     :param message:
     :return:
     """
 
-    encoded_message = message.encode("utf-8")
+    jsonStr = json.dumps({
+        "msg": message,
+        "receiver": receiver
+    })
+
+    encoded_message = jsonStr.encode("utf-8")
 
     # create msg header (msg len and msg type)
     header = struct.pack("!HB", len(encoded_message), msgType)
@@ -29,12 +38,12 @@ def send_message(sock, msgType, message):
 
 def message_receiver():
     while True:
-        msg_received = receiveMessage(sock)
+        msgType, msgStr = receiveMessage(clientSocket)
 
-        if not len(msg_received):
+        if not len(msgStr):
             continue
 
-        print("[RKchat] " + msg_received)
+        print("[RKchat] " + msgStr)
 
 
 def connectToServer(sslCtx):
@@ -66,7 +75,7 @@ if __name__ == '__main__':
     print("Connecting to server...")
 
     mySslCtx = setupSslContext()
-    sock = connectToServer(mySslCtx)
+    clientSocket = connectToServer(mySslCtx)
     startReceiver()
 
     print("Done!")
@@ -80,11 +89,17 @@ if __name__ == '__main__':
 
             # commands
             if usrInput[0] == "/":
-                pass
+                usrList = usrInput.split(" ")
+
+                if usrList[0] == "/msg":
+                    msgTo = usrList[1]
+                    msgContent = " ".join(usrList[2:])
+
+                    send_message(clientSocket, 1, msgContent, msgTo)
 
             # normal messages
             else:
-                send_message(sock, 0, usrInput)
+                send_message(clientSocket, 0, usrInput)
 
         except KeyboardInterrupt:
             sys.exit()

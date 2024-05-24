@@ -50,7 +50,7 @@ def sendMessage(sock, message, msgType):
 
 
 def clientThread(client_sock, client_addr):
-    global clients
+    global clientsSN
 
     print(f"[system] connected with {client_addr[0]}:{str(client_addr[1])}")
     print(f"[system] we now have {len(clients)} clients")
@@ -178,7 +178,7 @@ if __name__ == '__main__':
     print("[system] listening ...")
 
     # {clientSock: username}
-    clients = {}
+    clientsSN = {}
     usedNames = []
     clients_lock = threading.Lock()
 
@@ -187,7 +187,7 @@ if __name__ == '__main__':
             client_sock, client_addr = server_socket.accept()
 
             with clients_lock:
-                clients[client_sock] = None
+                clientsSN[client_sock] = None
 
             thread = threading.Thread(target=clientThread, args=(client_sock, client_addr))
             thread.daemon = True
