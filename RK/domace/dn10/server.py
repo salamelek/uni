@@ -53,6 +53,16 @@ def sendMessage(sock, msgType: int, message: str):
     sock.sendall(msg)
 
 
+def sendError(receiverSocket, errorMsg=""):
+    err = json.dumps({
+        "msg": errorMsg,
+        "receiver": clientsSN[receiverSocket],
+        "sender": None
+    })
+
+    sendMessage(receiverSocket, 2, err)
+
+
 def clientThread(clientSocket, clientAddr, clientName):
     global clientsSN, clientsNS
 
@@ -64,21 +74,34 @@ def clientThread(clientSocket, clientAddr, clientName):
             msgType, msgStr = receiveMessage(clientSocket)
 
             if not msgStr:
-                print("Huhh???")
-                break
+                print("The message was empty!")
+                continue
+
+            # add sender
+            jsonMsg = json.loads(msgStr)
+            jsonMsg["sender"] = clientsSN[clientSocket]
+            msgStr = json.dumps(jsonMsg)
 
             print(f"[RKchat] [{clientAddr[0]}:{str(clientAddr[1])} - {clientName}]: {msgStr}")
 
             # public messages
             if msgType == 0:
                 for client in clientsSN.keys():
+                    # dont send back to sending client
+                    if client == clientSocket:
+                        continue
+
                     sendMessage(client, 0, msgStr)
 
             # private message
             elif msgType == 1:
-                jsonMsg = json.loads(msgStr)
                 receiver = jsonMsg["receiver"]
-                receiverSocket = clientsNS[receiver]
+                try:
+                    receiverSocket = clientsNS[receiver]
+                except KeyError:
+                    print("Username not found, sending error...")
+                    sendError(clientSocket, "Username not found!")
+                    continue
 
                 print(f"Sending private message to {receiver}: {jsonMsg['msg']}")
 
@@ -87,7 +110,7 @@ def clientThread(clientSocket, clientAddr, clientName):
             # other types of messages
             else:
                 print("Other type of msg!")
-                pass
+                continue
 
     except Exception as e:
         print(f"{clientName} disconnected because of: {e}")

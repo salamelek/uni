@@ -37,13 +37,32 @@ def send_message(sock, msgType, message, receiver=None):
 
 
 def message_receiver():
+    global connected
+
     while True:
-        msgType, msgStr = receiveMessage(clientSocket)
+        try:
+            msgType, msgStr = receiveMessage(clientSocket)
 
-        if not len(msgStr):
-            continue
+            if not len(msgStr):
+                continue
 
-        print("[RKchat] " + msgStr)
+            jsonMsg = json.loads(msgStr)
+            sender = jsonMsg["sender"]
+            msg = jsonMsg["msg"]
+
+            if msgType == 0:
+                print(f"[{sender}] {msg}")
+
+            elif msgType == 1:
+                print(f"[Private - {sender}] {msg}")
+
+            elif msgType == 2:
+                print(f"[Error] {msg}")
+
+        except Exception as e:
+            print(f"Disconnected because of: {e}")
+            connected = False
+            break
 
 
 def connectToServer(sslCtx):
@@ -72,6 +91,9 @@ def startReceiver():
 
 
 if __name__ == '__main__':
+    connected = True
+
+
     print("Connecting to server...")
 
     mySslCtx = setupSslContext()
@@ -80,9 +102,13 @@ if __name__ == '__main__':
 
     print("Done!")
 
-    while True:
+    while connected:
         try:
             usrInput = input("")
+
+            if not connected:
+                print("Connection was closed!")
+                sys.exit()
 
             if not len(usrInput):
                 continue
