@@ -7,7 +7,7 @@ import threading
 
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 
-PORT = 1234
+PORT = 12345
 HEADER_LENGTH = 3
 
 
@@ -63,7 +63,7 @@ def sendError(receiverSocket, errorMsg=""):
     sendMessage(receiverSocket, 2, err)
 
 
-def sendSystMsg(clientSocket, systMsg=""):
+def sendSysMsgEveryoneElse(clientSocket, systMsg=""):
     msg = json.dumps({
         "msg": systMsg,
         "receiver": None,
@@ -77,21 +77,27 @@ def sendSystMsg(clientSocket, systMsg=""):
         sendMessage(client, 3, msg)
 
 
+def sendSysMsg(socket, systMsg=""):
+    msg = json.dumps({
+        "msg": systMsg,
+        "receiver": None,
+        "sender": None
+    })
+
+    sendMessage(socket, 3, msg)
+
+
 def clientThread(clientSocket, clientAddr, clientName):
     global clientsSN, clientsNS
 
     print(f"[system] connected with {clientAddr[0]}:{str(clientAddr[1])} - {clientName}")
     print(f"[system] we now have {len(clientsSN)} clients")
 
-    sendSystMsg(clientSocket, f"{clientName} connected!")
+    sendSysMsgEveryoneElse(clientSocket, f"{clientName} connected!")
 
     try:
         while True:
             msgType, msgStr = receiveMessage(clientSocket)
-
-            if not msgStr:
-                print("The message was empty!")
-                continue
 
             # add sender
             jsonMsg = json.loads(msgStr)
@@ -102,8 +108,12 @@ def clientThread(clientSocket, clientAddr, clientName):
 
             # public messages
             if msgType == 0:
+                if jsonMsg["msg"] == "":
+                    sendError(clientSocket, "Message was empty!")
+                    continue
+
                 for client in clientsSN.keys():
-                    # dont send back to sending client
+                    # don't send back to sending client
                     if client == clientSocket:
                         continue
 
@@ -111,6 +121,10 @@ def clientThread(clientSocket, clientAddr, clientName):
 
             # private message
             elif msgType == 1:
+                if jsonMsg["msg"] == "":
+                    sendError(clientSocket, "Message was empty!")
+                    continue
+
                 receiver = jsonMsg["receiver"]
                 try:
                     receiverSocket = clientsNS[receiver]
@@ -123,6 +137,17 @@ def clientThread(clientSocket, clientAddr, clientName):
 
                 sendMessage(receiverSocket, 1, msgStr)
 
+            # commands
+            elif msgType == 4:
+                if jsonMsg["msg"] == "/list":
+                    namesList = list(clientsNS.keys())
+                    msg = f"List of connected clients: {namesList}"
+
+                    sendSysMsg(clientSocket, msg)
+
+                else:
+                    sendError(clientSocket, "Unknown command!")
+
             # other types of messages
             else:
                 print("Other type of msg!")
@@ -130,7 +155,7 @@ def clientThread(clientSocket, clientAddr, clientName):
 
     except Exception as e:
         print(f"{clientName} disconnected because of: {e}")
-        sendSystMsg(clientSocket, f"{clientName} disconnected!")
+        sendSysMsgEveryoneElse(clientSocket, f"{clientName} disconnected!")
 
     with clientsLock:
         clientsSN.pop(clientSocket)
@@ -144,8 +169,8 @@ def setupSslContext():
     context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
     context.verify_mode = ssl.CERT_REQUIRED
 
-    context.load_cert_chain(certfile="server.crt", keyfile="server.key")
-    context.load_verify_locations(cafile="clients.pem")
+    context.load_cert_chain(certfile="certificates/server.crt", keyfile="certificates/server.key")
+    context.load_verify_locations(cafile="certificates/clients.pem")
 
     context.set_ciphers('ECDHE-RSA-AES128-GCM-SHA256')
 

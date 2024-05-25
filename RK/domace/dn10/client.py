@@ -8,13 +8,14 @@ import threading
 from server import PORT, receiveMessage
 
 
-def send_message(sock, msgType, message, receiver=None):
+def sendMessage(sock, msgType, message, receiver=None):
     """
     MsgType:
         0: public message
         1: private message
         2: errors
         3: system messages
+        4: commands
 
     :param receiver:
     :param sock:
@@ -80,11 +81,11 @@ def setupSslContext():
     context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
     context.verify_mode = ssl.CERT_REQUIRED
 
-    context.load_cert_chain(certfile="janez.crt", keyfile="janez.key")
-    # context.load_cert_chain(certfile="micka.crt", keyfile="micka.key")
-    # context.load_cert_chain(certfile="janez.crt", keyfile="janez.key")
+    context.load_cert_chain(certfile="certificates/janez.crt", keyfile="certificates/janez.key")
+    # context.load_cert_chain(certfile="certificates/micka.crt", keyfile="certificates/micka.key")
+    # context.load_cert_chain(certfile="certificates/lojze.crt", keyfile="certificates/lojze.key")
 
-    context.load_verify_locations("server.crt")
+    context.load_verify_locations("certificates/server.crt")
 
     context.set_ciphers("ECDHE-RSA-AES128-GCM-SHA256")
 
@@ -123,15 +124,20 @@ if __name__ == '__main__':
             if usrInput[0] == "/":
                 usrList = usrInput.split(" ")
 
+                # private message
                 if usrList[0] == "/msg":
                     msgTo = usrList[1]
                     msgContent = " ".join(usrList[2:])
 
-                    send_message(clientSocket, 1, msgContent, msgTo)
+                    sendMessage(clientSocket, 1, msgContent, msgTo)
+
+                # command
+                elif usrList[0] == "/list":
+                    sendMessage(clientSocket, 4, "/list")
 
             # normal messages
             else:
-                send_message(clientSocket, 0, usrInput)
+                sendMessage(clientSocket, 0, usrInput)
 
         except KeyboardInterrupt:
             sys.exit()
