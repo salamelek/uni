@@ -14,6 +14,7 @@ def send_message(sock, msgType, message, receiver=None):
         0: public message
         1: private message
         2: errors
+        3: system messages
 
     :param receiver:
     :param sock:
@@ -59,6 +60,9 @@ def message_receiver():
             elif msgType == 2:
                 print(f"[Error] {msg}")
 
+            elif msgType == 3:
+                print(f"[System] {msg}")
+
         except Exception as e:
             print(f"Disconnected because of: {e}")
             connected = False
@@ -77,6 +81,9 @@ def setupSslContext():
     context.verify_mode = ssl.CERT_REQUIRED
 
     context.load_cert_chain(certfile="janez.crt", keyfile="janez.key")
+    # context.load_cert_chain(certfile="micka.crt", keyfile="micka.key")
+    # context.load_cert_chain(certfile="janez.crt", keyfile="janez.key")
+
     context.load_verify_locations("server.crt")
 
     context.set_ciphers("ECDHE-RSA-AES128-GCM-SHA256")
@@ -92,7 +99,6 @@ def startReceiver():
 
 if __name__ == '__main__':
     connected = True
-
 
     print("Connecting to server...")
 

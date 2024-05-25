@@ -56,11 +56,25 @@ def sendMessage(sock, msgType: int, message: str):
 def sendError(receiverSocket, errorMsg=""):
     err = json.dumps({
         "msg": errorMsg,
-        "receiver": clientsSN[receiverSocket],
+        "receiver": None,
         "sender": None
     })
 
     sendMessage(receiverSocket, 2, err)
+
+
+def sendSystMsg(clientSocket, systMsg=""):
+    msg = json.dumps({
+        "msg": systMsg,
+        "receiver": None,
+        "sender": None
+    })
+
+    for client in clientsSN.keys():
+        if client == clientSocket:
+            continue
+
+        sendMessage(client, 3, msg)
 
 
 def clientThread(clientSocket, clientAddr, clientName):
@@ -68,6 +82,8 @@ def clientThread(clientSocket, clientAddr, clientName):
 
     print(f"[system] connected with {clientAddr[0]}:{str(clientAddr[1])} - {clientName}")
     print(f"[system] we now have {len(clientsSN)} clients")
+
+    sendSystMsg(clientSocket, f"{clientName} connected!")
 
     try:
         while True:
@@ -114,6 +130,7 @@ def clientThread(clientSocket, clientAddr, clientName):
 
     except Exception as e:
         print(f"{clientName} disconnected because of: {e}")
+        sendSystMsg(clientSocket, f"{clientName} disconnected!")
 
     with clientsLock:
         clientsSN.pop(clientSocket)
@@ -162,6 +179,12 @@ if __name__ == "__main__":
             clientSocket = mySslCtx.wrap_socket(clientSocket, server_side=True)
 
             clientName = clientSocket.getpeercert()["subject"][3][0][1]
+
+            # client with same name already connected
+            if clientName in clientsNS.keys():
+                sendError(clientSocket, "A client with your name is already connected!")
+                print(f"Another {clientName} tried to connect!")
+                continue
 
             with clientsLock:
                 clientsSN[clientSocket] = clientName
