@@ -1,0 +1,9 @@
+Velikost paketov Ipv4, 6
+Tunneling
+SMTP protokol
+Čas prenost HTML strani
+Sistem IDS??
+DES enkripcija
+Usmerjevalne tabele
+Računanje cene povezave
+TCP hitrost

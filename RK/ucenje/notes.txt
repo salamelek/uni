@@ -1,0 +1,60 @@
+Povezavna plast:
+	Odpravljanje napak:
+		Paritetni biti:
+			Liha paritetna shema: dodamo 0, če je liho št. enic
+			Soda paritetna shema: dodamo 0, če je sodo št. enic
+			
+		Hamming code:
+			p1, p2, n3, p4, n5, n6, n7
+			        0       1   1   0
+	        1       0       1   1   0
+	        1   1   0       1   1   0
+	        1   1   0   0   1   1   0
+	        ... prenos ...
+	        1   1   0   0   1   0   0
+	        
+	        s1 = 0
+	        s2 = 1
+	        s4 = 1
+	        
+	        s4, s2, s1 = sindrom = 110
+	        napačen bit: n6
+	        
+    
+    Delitev kanala:
+    	ALOHA:
+    		Če pride do trka, počakaj random čas in spet pošlji
+
+		Razsekana ALOHA:
+			Isto kot aloha, ampak v točno določenih intervalih
+			
+		CSMA:
+			Carrier Sense Multiple Access
+			"Prisluhni predno spregovoriš"
+			
+		CSMA/CD:
+			Carrier Sense Multiple Access Collision Detection
+			"Prisluhni predno spregovoriš, če pa govoriš in tudi nekdo drug govori, prekini govor"
+		
+		CSMA/CA:
+			Carrier Sense Multiple Access/Collision Avoidance
+			Se rabi pri WiFi, ker se ne da izvezti Collision Detection
+			Pošiljajo se RTS in CTS (Request/Clear To Send)
+			Če en pošiljatelj sliši CTS brez da bi Requestal, za nekaj casa utihne
+			
+	Protokoli:
+		Ethernet:
+			CSMA/CD + eksponentno čakanje (1: 0-2, 2: 0-4, 3: 0-8, ...)
+			Jam signal ko pride do kolizije, da se odvrže paket
+			Vsak paket ima sprejemnikov MAC naslov
+				FFFF...FFF = Brodcast addr
+
+			ARP:
+				Adress Resolution Protocol
+				Brodcast za dobit MAC od IP-ja
+				To se shrani v ARP tabelo (IP <-> MAC)
+				
+		WiFi:
+			Vsaka dostopna tocka ima svoj BSSID, za razumet kdo je kdo pri prejetju in oddajanju sporocil (kot en MAC)x	
+			Beacon: "Hey, obstajam!" --> Association request: "Ok blud, poveži me!" --> Association resp: "k"
+			Probe req: "Hey, obstaja kdo?" --> Probe resp: "Ja! Jaz obstajam!" --> Ass req, resp
