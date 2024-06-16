@@ -1,0 +1,28 @@
+SKLAD
+
+sklad dela z last in first out pristopom
+
+en element v skladu ima 4 bajte in ima en naslov (0x800)
+imamo tudi stack pointer, ki v našem primeru kaže na 0x800 (na element v skladu)
+
+stack pointer (sp) se hrani v x2
+
+sklad bo šel od 0x800 do 0x0 (torej padajoče) sklad narašča v smeri padajočih naslovov
+
+dodajanje v sklad:
+	push: sw, t0, 0(sp)
+		  addi sp, sp, -4
+	
+branje iz sklada:
+	pop: addi sp, sp, 4
+		 lw t0, 0(sp)
+
+če sklad pride čez njegove meje, pride do stackoverflow.
+Za to ponavadi skrbi operacijski sistem
+
+ko kličemo funkcijo, shranimo naslov klicane funkcije v ra - return address, ki se nahaja v x1
+seveda pa imamo lahko funkcijo v funkcij, torej ko vstopimo v funkcijo, ga postavimo v sklad, da ga potem lahko rabimo
+v s0 shranjujemo vrednost framePointerja
+v tem frame pa moramo še prej shraniti framePointer klicoče funkcije
+
+registri a0-a7 so rezervirani za argumente funkcije

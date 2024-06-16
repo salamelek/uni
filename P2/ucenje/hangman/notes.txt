@@ -1,0 +1,27 @@
+Length of arrays:
+	Statically allocated: 	Sizeof(array) / sizeof(array[0])
+	Dinamically allocated: 	Use the number given in the malloc() arg.
+	Functions: 				Pass the len of the array as a parameter
+	
+	
+Mem allocations:
+	(type *) malloc(len * sizeof(type));
+	(type *) calloc(len, sizeof(type));
+
+
+Read from console:
+	Clear buffer: while (getchar() != '\n');
+	
+
+Read from file:
+	Open file in read mode:		FILE *file = fopen("filename.txt", "r");
+	Rewind file back to top: 	rewind(file);
+	End of string:				'\0'
+	
+	
+Random number:
+	int a = rand();
+	
+	srand(seed);
+	srand(time(NULL));
+	int a = rand();

@@ -1,0 +1,36 @@
+Length of arrays:
+	Statically allocated: 	Sizeof(array) / sizeof(array[0])
+	Dinamically allocated: 	Use the number given in the malloc() arg.
+	Functions: 				Pass the len of the array as a parameter
+	
+	
+Mem allocations:
+	(type *) malloc(len * sizeof(type));
+	(type *) calloc(len, sizeof(type));
+
+
+Read from console:
+	Clear buffer: while (getchar() != '\n');
+	
+
+Read from file:
+	Open file in read mode:		FILE *file = fopen("filename.txt", "r");
+	read from file:				fgets(stringPointer, size, file);
+	Rewind file back to top: 	rewind(file);
+	End of string:				'\0'
+	
+Read bin file:
+	pmove pointer: 				fseek(file, 0, SEEK_END);	// 0 -> offset
+		SEEK_END: end of file
+		SEEK_CUR: current pos
+		SEEK_SET: beginning
+	get posision of pointer: 	long point = ftell(file);
+	read bytes:					fread(destPointer, chunkSize, chunkNumb, file);
+	write bytes:				fwrite(sourcePointer, chunkSize, chunkNumb, file);
+	
+Random number:
+	int a = rand();
+	
+	srand(seed);
+	srand(time(NULL));
+	int a = rand();

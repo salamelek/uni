@@ -1,0 +1,11 @@
+DPU se rabi da se zajame zahteve uporabnikov
+
+
+Gradniki so: primeri uporabe, akteri, povezave
+
+
+Povezave:
+	Polna puščica: akter uporablja nek primer (akter dviguje denar od bankomata)
+	Črtkana puščica:
+		<include>: Nujno potrebno
+		<extends>: Ni nujno potrebno
